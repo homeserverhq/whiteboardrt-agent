@@ -8,7 +8,7 @@ licensed under the SIL Open Font License, Version 1.1, reproduced below.
 
 | File | Typeface | Copyright / attribution |
 |---|---|---|
-| `Excalifont-Regular.ttf` | Excalifont | Copyright (c) Excalidraw (https://plus.excalidraw.com/excalifont), with Reserved Font Name Excalifont. |
+| `Excalifont-Regular.ttf` | Excalifont | Copyright (c) Excalidraw, with Reserved Font Name Excalifont. |
 | `Virgil-Regular.ttf` | Virgil | Copyright (c) 2021 - Present, Ellinor Rapp, with Reserved Font Name Virgil. |
 | `CascadiaCode-Regular.ttf` | Cascadia Code | Copyright (c) 2019 - Present, Microsoft Corporation, with Reserved Font Name Cascadia Code. |
 | `LiberationSans-Regular.ttf` | Liberation Sans | Copyright (c) 2012 Red Hat, Inc., with Reserved Font Name Liberation. Digitized data copyright (c) 2010 Google Corporation. |

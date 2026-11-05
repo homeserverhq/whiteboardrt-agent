@@ -8,6 +8,7 @@ import {
   batchCreateElementsOnCanvas,
   replaceElementsOnCanvas
 } from './canvas-client.js';
+import { PRODUCT_NAME } from './brand.js';
 import { sanitizeFilePath } from './normalize.js';
 import { decodeSceneInput } from './scene-input.js';
 import { expandElementsForExport } from './expand-elements.js';
@@ -35,7 +36,7 @@ export async function buildSceneFile(): Promise<ExportedScene> {
   const excalidrawScene: Record<string, any> = {
     type: 'excalidraw',
     version: 2,
-    source: 'mcp-excalidraw-server',
+    source: PRODUCT_NAME,
     elements: exportElements,
     appState: {
       viewBackgroundColor: '#ffffff',

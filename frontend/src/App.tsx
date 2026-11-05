@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import {
   Excalidraw,
+  MainMenu,
   convertToExcalidrawElements,
   CaptureUpdateAction,
   exportToBlob,
@@ -17,6 +18,9 @@ import type {
 import { convertMermaidToExcalidraw, DEFAULT_MERMAID_CONFIG } from './utils/mermaidConverter'
 import { cleanElementForExcalidraw, prepareServerScene, assertScenePreserved } from './utils/scene'
 import { preloadCanvasFonts } from './utils/fonts'
+import { installBrandingCleanup } from './utils/branding'
+import { AboutDialog } from './components/AboutDialog'
+import { PRODUCT_NAME } from './brand'
 import type { ServerElement } from './utils/scene'
 import type { MermaidConfig } from '@excalidraw/mermaid-to-excalidraw'
 
@@ -107,6 +111,8 @@ const SCENE_MUTATIONS = new Set([
 
 function App(): JSX.Element {
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPIRefValue | null>(null)
+  const [showAbout, setShowAbout] = useState(false)
+  useEffect(() => installBrandingCleanup(), [])
   // Ref so WS message handlers (captured in stale closures) always see the latest API instance
   const excalidrawAPIRef = useRef<ExcalidrawAPIRefValue | null>(null)
   useEffect(() => {
@@ -875,7 +881,7 @@ function App(): JSX.Element {
     <div className="app" data-theme={theme}>
       {/* Header */}
       <div className="header">
-        <h1>Excalidraw AI</h1>
+        <h1>{PRODUCT_NAME}</h1>
         <div className="controls">
           <div className="status">
             <div className={`status-dot ${isConnected ? 'status-connected' : 'status-disconnected'}`}></div>
@@ -952,12 +958,26 @@ function App(): JSX.Element {
             initialData={{
               elements: [],
               appState: {
-                theme
+                theme,
+                currentItemFontFamily: 1
               }
             }}
-          />
+          >
+            <MainMenu>
+              <MainMenu.DefaultItems.Export />
+              <MainMenu.DefaultItems.SearchMenu />
+              <MainMenu.Separator />
+              <MainMenu.Item onSelect={() => setShowAbout(true)}>
+                About {PRODUCT_NAME}
+              </MainMenu.Item>
+              <MainMenu.Separator />
+              <MainMenu.DefaultItems.ToggleTheme />
+              <MainMenu.DefaultItems.ChangeCanvasBackground />
+            </MainMenu>
+          </Excalidraw>
         </div>
       </div>
+      <AboutDialog open={showAbout} onClose={() => setShowAbout(false)} />
     </div>
   )
 }

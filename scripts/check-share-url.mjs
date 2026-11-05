@@ -33,13 +33,29 @@ function readConfig(env) {
   return JSON.parse(out.toString());
 }
 
-await check('config: defaults to excalidraw.com', async () => {
-  assert.deepEqual(readConfig({}), ['https://json.excalidraw.com/api/v2/post/', 'https://excalidraw.com']);
+await check('config: sharing is disabled by default', async () => {
+  assert.deepEqual(readConfig({}), ['', '']);
 });
 
-await check('config: blank values fall back to defaults, trailing slashes are trimmed', async () => {
+await check('config: blank upload stays disabled, trailing slashes are trimmed', async () => {
   assert.deepEqual(readConfig({ EXCALIDRAW_SHARE_UPLOAD_URL: '  ', EXCALIDRAW_SHARE_BASE_URL: 'https://draw.example.com//' }),
-    ['https://json.excalidraw.com/api/v2/post/', 'https://draw.example.com']);
+    ['', 'https://draw.example.com']);
+});
+
+await check('config: WHITEBOARDAI names take precedence over legacy names', async () => {
+  assert.deepEqual(readConfig({
+    WHITEBOARDAI_SHARE_UPLOAD_URL: 'https://new.example.com/upload/',
+    WHITEBOARDAI_SHARE_BASE_URL: 'https://new.example.com/',
+    EXCALIDRAW_SHARE_UPLOAD_URL: 'https://old.example.com/upload/',
+    EXCALIDRAW_SHARE_BASE_URL: 'https://old.example.com/'
+  }), ['https://new.example.com/upload/', 'https://new.example.com']);
+});
+
+await check('share: disabled without configuration', async () => {
+  const out = execFileSync(process.execPath, ['--input-type=module', '-e',
+    "const { exportToExcalidrawUrl } = await import('./dist/core/share-url.js'); try { await exportToExcalidrawUrl([{ id: 'a', type: 'rectangle', x: 0, y: 0 }]); process.exit(2); } catch (error) { console.log(error.message); }"],
+    { env: { PATH: process.env.PATH } });
+  assert.match(out.toString(), /Sharing is not configured/);
 });
 
 // Fake excalidraw-json store
@@ -81,6 +97,7 @@ await check('share: uploads to the configured URL and builds the link from the c
   const [, data] = splitBuffers(new Uint8Array(zlib.inflateSync(plain)));
   const scene = JSON.parse(Buffer.from(data));
   assert.equal(scene.type, 'excalidraw');
+  assert.equal(scene.source, 'WhiteboardAI');
   assert.deepEqual(scene.elements.map((e) => e.id).sort(), ['a', 'b']);
 });
 

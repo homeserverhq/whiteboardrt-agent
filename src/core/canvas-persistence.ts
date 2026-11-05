@@ -120,7 +120,8 @@ interface KnownDurableBlob {
 const knownDurableBlobs = new Map<string, KnownDurableBlob>();
 
 export function durableStateDirectory(): string | null {
-  const configured = process.env.EXCALIDRAW_DATA_DIR?.trim();
+  const configured =
+    process.env.WHITEBOARDAI_DATA_DIR?.trim() || process.env.EXCALIDRAW_DATA_DIR?.trim();
   return configured ? resolve(configured) : null;
 }
 

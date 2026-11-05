@@ -1,6 +1,7 @@
 import { deflateSync } from 'zlib';
 import { webcrypto } from 'crypto';
 import { ServerElement } from '../types.js';
+import { PRODUCT_NAME } from './brand.js';
 import { expandElementsForExport } from './expand-elements.js';
 import { EXCALIDRAW_SHARE_UPLOAD_URL, EXCALIDRAW_SHARE_BASE_URL } from './config.js';
 
@@ -21,11 +22,18 @@ function concatBuffers(...bufs: Uint8Array[]): Uint8Array {
   return out;
 }
 
-// Export elements to a shareable Excalidraw URL (excalidraw.com unless
-// EXCALIDRAW_SHARE_UPLOAD_URL / EXCALIDRAW_SHARE_BASE_URL point elsewhere). The diagram is
-// encrypted client-side (AES-GCM 128) and uploaded; the decryption key only
-// lives in the URL fragment.
+// Export elements to a shareable URL. Sharing is disabled unless
+// WHITEBOARDAI_SHARE_UPLOAD_URL and WHITEBOARDAI_SHARE_BASE_URL are configured.
+// The diagram is encrypted client-side (AES-GCM 128) and uploaded; the
+// decryption key only lives in the URL fragment.
 export async function exportToExcalidrawUrl(urlExportElements: ServerElement[]): Promise<string> {
+  if (!EXCALIDRAW_SHARE_UPLOAD_URL || !EXCALIDRAW_SHARE_BASE_URL) {
+    throw new Error(
+      'Sharing is not configured. Set WHITEBOARDAI_SHARE_UPLOAD_URL and ' +
+      'WHITEBOARDAI_SHARE_BASE_URL to enable it.'
+    );
+  }
+
   if (urlExportElements.length === 0) {
     throw new Error('Canvas is empty — nothing to export');
   }
@@ -36,7 +44,7 @@ export async function exportToExcalidrawUrl(urlExportElements: ServerElement[]):
   const excalidrawScene = {
     type: 'excalidraw',
     version: 2,
-    source: 'https://excalidraw.com',
+    source: PRODUCT_NAME,
     elements: cleanedExportElements,
     appState: {
       viewBackgroundColor: '#ffffff',

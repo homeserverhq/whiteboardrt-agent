@@ -33,7 +33,7 @@ const COMMANDS: Record<string, Command> = {
   mermaid: { handler: scene.mermaid, summary: 'Render a Mermaid diagram onto the canvas (needs a browser tab)', usage: 'mermaid [diagram.mmd|-] (or stdin)' },
   snapshot: { handler: snapshot, summary: 'Save / list / restore named canvas snapshots', usage: 'snapshot save|list|restore [name]' },
   arrange: { handler: arrange, summary: 'Align, distribute, group, lock, duplicate elements', usage: 'arrange align|distribute|group|ungroup|lock|unlock|duplicate --ids a,b,c [--to left|horizontal|...]' },
-  share: { handler: scene.share, summary: 'Export to a shareable excalidraw.com URL', usage: 'share' },
+  share: { handler: scene.share, summary: 'Export to a shareable URL (requires share configuration)', usage: 'share' },
   clear: { handler: scene.clear, summary: 'Clear the whole canvas', usage: 'clear --yes' },
   'install-skill': { handler: installSkill, summary: 'Install the bundled agent skill', usage: 'install-skill [--dir <skills-root>] [--target claude|codex|<skills-root>] [--print-source]' }
 };

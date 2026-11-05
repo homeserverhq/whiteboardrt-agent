@@ -1,6 +1,6 @@
 version: '3.8'
 
-# Docker Compose for MCP Excalidraw
+# Docker Compose for WhiteboardAI Canvas
 #
 # Usage scenarios:
 # 1. Canvas only:       docker-compose up canvas
@@ -10,19 +10,20 @@ version: '3.8'
 # Most common: Run canvas locally, MCP via Claude Desktop config
 
 services:
-  # Canvas server (optional) - Visual UI and REST API
+  # WhiteboardAI canvas server - Visual UI and REST API
   canvas:
     build:
       context: .
       dockerfile: Dockerfile.canvas
-    image: mcp-excalidraw-canvas:latest
-    container_name: mcp-excalidraw-canvas
+    image: whiteboardai-canvas:latest
+    container_name: whiteboardai-canvas
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
+      - WHITEBOARDAI_PUBLIC_URL=${WHITEBOARDAI_PUBLIC_URL:-}
       - DEBUG=false
     restart: unless-stopped
     healthcheck:

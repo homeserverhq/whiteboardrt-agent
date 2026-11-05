@@ -676,7 +676,7 @@ export async function callExcalidrawTool(
       }
 
       case 'export_to_excalidraw_url': {
-        logger.info('Exporting to excalidraw.com URL');
+        logger.info('Exporting to shareable URL');
 
         const urlExportElements = await getElements();
         const shareUrl = await exportToExcalidrawUrl(urlExportElements);

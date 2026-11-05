@@ -467,7 +467,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'export_to_excalidraw_url',
-    description: 'Export the current canvas to a shareable excalidraw.com URL. The diagram is encrypted and uploaded; anyone with the URL can view it. Returns the shareable link.',
+    description: 'Export the current canvas to a shareable URL when sharing is configured. The diagram is encrypted and uploaded; anyone with the URL can view it. Returns the shareable link.',
     inputSchema: {
       type: 'object',
       properties: {}
