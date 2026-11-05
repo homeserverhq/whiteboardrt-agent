@@ -128,7 +128,7 @@ function assertModernResult(result, label) {
   assertEqual(result.resultType, 'complete', `${label}: resultType`);
   const serverInfo = result._meta?.[SERVER_INFO_META_KEY];
   assert(serverInfo !== undefined, `${label}: missing ${SERVER_INFO_META_KEY} in _meta`);
-  assertEqual(serverInfo.name, 'mcp-excalidraw-server', `${label}: serverInfo.name`);
+  assertEqual(serverInfo.name, 'whiteboardai-server', `${label}: serverInfo.name`);
 }
 
 // tools/list and server/discover are CacheableResult extenders on 2026-07-28.
@@ -171,6 +171,14 @@ async function checkDirectCallWithoutInitialization() {
   assert(
     listResult.tools.some(tool => tool.name === CANVAS_FREE_TOOL),
     `tools/list: expected ${CANVAS_FREE_TOOL} to be advertised`
+  );
+  assert(
+    listResult.tools.some(tool => tool.name === 'export_to_share_url'),
+    'tools/list: expected export_to_share_url to be advertised'
+  );
+  assert(
+    listResult.tools.some(tool => tool.name === 'export_to_excalidraw_url'),
+    'tools/list: expected the deprecated share-link alias to be advertised'
   );
   assertModernResult(listResult, 'tools/list');
   assertCacheFields(listResult, 'tools/list');
@@ -237,12 +245,20 @@ async function checkLegacyInitialize() {
 
   const initResult = resultOf(responses.find(r => r.id === 1), 'initialize');
   assertEqual(initResult.protocolVersion, LEGACY_VERSION, 'initialize: negotiated protocol version');
-  assertEqual(initResult.serverInfo?.name, 'mcp-excalidraw-server', 'initialize: serverInfo.name');
+  assertEqual(initResult.serverInfo?.name, 'whiteboardai-server', 'initialize: serverInfo.name');
   assert(initResult.capabilities?.tools !== undefined, 'initialize: tools capability must be advertised');
   assert(initResult.resultType === undefined, 'initialize: 2025-era results must not carry resultType');
 
   const listResult = resultOf(responses.find(r => r.id === 2), 'legacy tools/list');
   assert(Array.isArray(listResult.tools) && listResult.tools.length > 0, 'legacy tools/list: expected a non-empty tool list');
+  assert(
+    listResult.tools.some(tool => tool.name === 'export_to_share_url'),
+    'legacy tools/list: expected export_to_share_url to be advertised'
+  );
+  assert(
+    listResult.tools.some(tool => tool.name === 'export_to_excalidraw_url'),
+    'legacy tools/list: expected the deprecated share-link alias to be advertised'
+  );
   assert(listResult.resultType === undefined, 'legacy tools/list: 2025-era results must not carry resultType');
   assert(listResult.ttlMs === undefined, 'legacy tools/list: 2025-era results must not carry cache fields');
 

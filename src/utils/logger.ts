@@ -12,15 +12,15 @@ import { homedir, tmpdir } from 'os';
  */
 function defaultLogPath(): string {
   if (process.platform === 'darwin') {
-    return path.join(homedir(), 'Library', 'Logs', 'excalidraw-mcp.log');
+    return path.join(homedir(), 'Library', 'Logs', 'whiteboardai.log');
   }
   if (process.platform === 'win32') {
     const base = process.env.LOCALAPPDATA || path.join(homedir(), 'AppData', 'Local');
-    return path.join(base, 'Excalidraw-MCP', 'excalidraw.log');
+    return path.join(base, 'WhiteboardAI', 'whiteboardai.log');
   }
   // Linux and other POSIX platforms: follow the XDG state convention.
   const xdgState = process.env.XDG_STATE_HOME || path.join(homedir(), '.local', 'state');
-  return path.join(xdgState, 'excalidraw-mcp', 'excalidraw.log');
+  return path.join(xdgState, 'whiteboardai', 'whiteboardai.log');
 }
 
 const LOG_FILE_PATH = process.env.LOG_FILE_PATH || defaultLogPath();
@@ -41,7 +41,7 @@ function resolveLogFilePath(): string {
     }
   }
 
-  return ensureWritableLogFile(path.join(tmpdir(), 'excalidraw-mcp.log'));
+  return ensureWritableLogFile(path.join(tmpdir(), 'whiteboardai.log'));
 }
 
 const RESOLVED_LOG_FILE_PATH = resolveLogFilePath();

@@ -1,10 +1,12 @@
 {
-  "name": "mcp-excalidraw-server",
+  "name": "whiteboardai-server",
   "version": "2.1.2",
-  "description": "Excalidraw toolkit for AI coding agents — agent skill, CLI, and MCP server with a live canvas",
+  "description": "WhiteboardAI canvas toolkit for AI agents — agent skill, CLI, and MCP server with a live shared canvas",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
+    "whiteboardai-server": "dist/bin.js",
+    "whiteboardai-canvas": "dist/bin.js",
     "mcp-excalidraw-server": "dist/bin.js",
     "excalidraw-canvas": "dist/bin.js"
   },
@@ -22,7 +24,7 @@
     "production": "npm run build && npm run canvas",
     "prepublishOnly": "npm run build",
     "sync:skills": "node scripts/sync-skills.mjs",
-    "test": "npm run test:mcp && npm run test:bind && npm run test:render && npm run test:state && npm run test:durable && npm run test:share && npm run test:disabled && npm run brand:check",
+    "test": "npm run test:mcp && npm run test:bind && npm run test:render && npm run test:state && npm run test:durable && npm run test:remote && npm run test:share && npm run test:disabled && npm run brand:check",
     "brand:check": "node scripts/check-branding.mjs",
     "test:bind": "npm run build:server && node scripts/check-local-bind.mjs",
     "test:mcp": "npm run build:server && node scripts/check-mcp-stdio.mjs",
@@ -32,6 +34,7 @@
     "test:canvas": "npm run build && playwright test",
     "type-check:frontend": "tsc --noEmit -p frontend/tsconfig.json",
     "test:durable": "npm run build:server && node scripts/check-durable-state.mjs",
+    "test:remote": "npm run build:server && node scripts/check-remote-state.mjs",
     "test:share": "npm run build:server && node scripts/check-share-url.mjs",
     "test:disabled": "npm run build:server && node scripts/check-disabled-tools.mjs",
     "type-check": "npx tsc --noEmit"
@@ -89,20 +92,18 @@
     "claude-skill",
     "agent-skills",
     "cli",
-    "ai-agents"
+    "ai-agents",
+    "whiteboardai"
   ],
-  "author": {
-    "name": "yctimlin",
-    "email": "c22647809@gmail.com"
-  },
+  "author": "WhiteboardAI contributors",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yctimlin/mcp_excalidraw.git"
+    "url": "https://github.com/homeserverhq/excalidraw-ai.git"
   },
-  "homepage": "https://github.com/yctimlin/mcp_excalidraw#readme",
+  "homepage": "https://github.com/homeserverhq/excalidraw-ai#readme",
   "bugs": {
-    "url": "https://github.com/yctimlin/mcp_excalidraw/issues"
+    "url": "https://github.com/homeserverhq/excalidraw-ai/issues"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -118,6 +119,7 @@
     "assets/**/*",
     "*.d.ts",
     "README.md",
+    "MCP.md",
     "LICENSE"
   ]
 }

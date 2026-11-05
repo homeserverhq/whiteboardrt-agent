@@ -24,6 +24,8 @@ services:
       - PORT=3000
       - HOST=0.0.0.0
       - WHITEBOARDAI_PUBLIC_URL=${WHITEBOARDAI_PUBLIC_URL:-}
+      - WHITEBOARDAI_STORAGE_URL=${WHITEBOARDAI_STORAGE_URL:-}
+      - WHITEBOARDAI_PERSISTENCE=${WHITEBOARDAI_PERSISTENCE:-}
       - DEBUG=false
     restart: unless-stopped
     healthcheck:
@@ -41,14 +43,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: mcp-excalidraw:latest
-    container_name: mcp-excalidraw-mcp
+    image: whiteboardai-mcp:latest
+    container_name: whiteboardai-mcp
     ports:
       - "3100:3100"
     environment:
       - NODE_ENV=production
       - EXPRESS_SERVER_URL=http://canvas:3000
-      - EXCALIDRAW_PUBLIC_URL=${EXCALIDRAW_PUBLIC_URL:-}
+      - WHITEBOARDAI_PUBLIC_URL=${WHITEBOARDAI_PUBLIC_URL:-}
       - ENABLE_CANVAS_SYNC=true
       - MCP_TRANSPORT=http
       - MCP_HOST=0.0.0.0

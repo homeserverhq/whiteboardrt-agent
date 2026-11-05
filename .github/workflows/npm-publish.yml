@@ -72,7 +72,7 @@ jobs:
           PACKAGE_VERSION: ${{ steps.package-version.outputs.version }}
         run: |
           set +e
-          npm_output=$(npm view "mcp-excalidraw-server@${PACKAGE_VERSION}" version 2>&1)
+          npm_output=$(npm view "whiteboardai-server@${PACKAGE_VERSION}" version 2>&1)
           npm_status=$?
           set -e
 
@@ -118,14 +118,14 @@ jobs:
       - name: Create GitHub Release Assets
         if: github.event_name == 'release'
         run: |
-          tar -czf mcp-excalidraw-server-${{ steps.package-version.outputs.version }}.tar.gz dist/
+          tar -czf whiteboardai-server-${{ steps.package-version.outputs.version }}.tar.gz dist/
 
       - name: Upload Release Assets
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            mcp-excalidraw-server-${{ steps.package-version.outputs.version }}.tar.gz
+            whiteboardai-server-${{ steps.package-version.outputs.version }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -142,8 +142,8 @@ jobs:
           VERSION_EXISTS: ${{ needs.publish.outputs.version_exists }}
         run: |
           if [ "$VERSION_EXISTS" = "true" ]; then
-            echo "mcp-excalidraw-server@$PACKAGE_VERSION already exists on NPM; publish was skipped"
+            echo "whiteboardai-server@$PACKAGE_VERSION already exists on NPM; publish was skipped"
           else
-            echo "mcp-excalidraw-server@$PACKAGE_VERSION was successfully published to NPM"
+            echo "whiteboardai-server@$PACKAGE_VERSION was successfully published to NPM"
           fi
-          echo "View at: https://www.npmjs.com/package/mcp-excalidraw-server/v/$PACKAGE_VERSION"
+          echo "View at: https://www.npmjs.com/package/whiteboardai-server/v/$PACKAGE_VERSION"

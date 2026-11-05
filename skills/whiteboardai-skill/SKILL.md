@@ -1,20 +1,20 @@
 ---
-name: excalidraw-skill
-description: Excalidraw canvas toolkit for creating, editing, and refining diagrams on a live canvas. Use when an agent needs to (1) draw or lay out diagrams, (2) iteratively refine them by describing the scene and screenshotting its own work, (3) export/import .excalidraw files or PNG/SVG images, (4) save/restore canvas snapshots, (5) convert Mermaid to Excalidraw, or (6) perform element-level CRUD, alignment, distribution, grouping, duplication, and locking. Primary interface is the bundled CLI (npx -y mcp-excalidraw-server <command>) which auto-starts the canvas server; MCP tools and a REST API are equivalent alternatives.
+name: whiteboardai-skill
+description: WhiteboardAI canvas toolkit for creating, editing, and refining diagrams on a live canvas. Use when an agent needs to (1) draw or lay out diagrams, (2) iteratively refine them by describing the scene and screenshotting its own work, (3) export/import .excalidraw files or PNG/SVG images, (4) save/restore canvas snapshots, (5) convert Mermaid to WhiteboardAI, or (6) perform element-level CRUD, alignment, distribution, grouping, duplication, and locking. Primary interface is the bundled CLI (npx -y whiteboardai-server <command>) which auto-starts the canvas server; MCP tools and a REST API are equivalent alternatives.
 ---
 
-# Excalidraw Skill
+# WhiteboardAI Skill
 
 ## Step 0: Pick an Interface
 
 Three interfaces drive the same live canvas. Pick the first one that applies:
 
-1. **MCP tools** — if `excalidraw/*` tools (e.g. `batch_create_elements`) are in your tool list, prefer them: results land directly in your context, and screenshots come back as images without touching disk.
+1. **MCP tools** — if `whiteboardai/*` tools (e.g. `batch_create_elements`) are in your tool list, prefer them: results land directly in your context, and screenshots come back as images without touching disk.
 2. **CLI** (default when no MCP tools are present):
    ```bash
-   npx -y mcp-excalidraw-server <command>
+   npx -y whiteboardai-server <command>
    ```
-   No setup needed — any canvas-touching command **auto-starts the canvas server** on `http://127.0.0.1:3000` (first `npx` run downloads the package). If the CLI is installed globally (`npm i -g mcp-excalidraw-server`), the shorter alias `excalidraw-canvas <command>` works too.
+   No setup needed — any canvas-touching command **auto-starts the canvas server** on `http://127.0.0.1:3000` (first `npx` run downloads the package). If the CLI is installed globally (`npm i -g whiteboardai-server`), the shorter alias `whiteboardai-canvas <command>` works too.
 3. **REST API** (last resort, e.g. from application code): HTTP endpoints on `http://127.0.0.1:3000` — see `references/cheatsheet.md` for payloads. The server must already be running.
 
 The canvas URL comes from `EXPRESS_SERVER_URL` (default `http://127.0.0.1:3000`). Screenshots and image exports render headless inside the canvas server, so you never need a browser tab to check your own work. Only mermaid conversion and viewport control need an open tab (CLI exits with code 4 when it's missing). Still tell the user the URL — opening it lets them watch you draw.
@@ -36,7 +36,7 @@ Results are JSON on stdout — except `describe` (plain text) and raw-content ou
 | Scene files | `export [--out scene.excalidraw]`, `import [scene.excalidraw|-] [--replace]` — a `.excalidraw.md` out path writes Obsidian's format (see File I/O) |
 | Mermaid → canvas | `mermaid [diagram.mmd|-]` (or stdin) |
 | Snapshots | `snapshot save\|list\|restore <name>` |
-| Share link | `share` (encrypted upload → excalidraw.com URL) |
+| Share link | `share` (encrypted upload → configured share URL; disabled by default) |
 | Wipe canvas | `clear --yes` |
 | Install / upgrade this skill | `install-skill --dir <skills-root>` (agent chooses project/global root) |
 
@@ -44,7 +44,7 @@ Results are JSON on stdout — except `describe` (plain text) and raw-content ou
 
 The CLI and MCP tools accept the same agent-friendly format and normalize it automatically:
 
-- **Labels**: put `"text": "My Label"` on any shape — converted to Excalidraw's bound-label format for you.
+- **Labels**: put `"text": "My Label"` on any shape — converted to WhiteboardAI's bound-label format for you.
 - **Arrow binding**: `"startElementId": "a"` / `"endElementId": "b"` — arrows auto-route to element edges.
 - **fontFamily**: pass a string name (`"helvetica"`, `"cascadia"`, `"excalifont"`, ...) or string number `"1"`–`"8"`.
 - **points**: both `[[x,y], ...]` tuples and `[{"x":..,"y":..}]` objects are accepted.
@@ -78,7 +78,7 @@ These are the most common mistakes that produce unreadable diagrams. Avoid all o
 
 ### 1. Do NOT use `label.text` (or `text`) on large background zone rectangles
 
-When you put a label on a background rectangle, Excalidraw creates a bound text element centered in the middle of that shape — right where your service boxes will be placed. The text overlaps everything inside the zone and cannot be repositioned.
+When you put a label on a background rectangle, WhiteboardAI creates a bound text element centered in the middle of that shape — right where your service boxes will be placed. The text overlaps everything inside the zone and cannot be repositioned.
 
 **Wrong:**
 ```json
@@ -113,7 +113,7 @@ Arrow labels are placed at the midpoint of the arrow. On short arrows, they over
 
 ## Quality: Why It Matters (and How to Check)
 
-Excalidraw diagrams are visual communication. If text is cut off, elements overlap, or arrows cross through unrelated shapes, the diagram becomes confusing and unprofessional — it defeats the whole purpose of drawing it. So after every batch of elements, verify before adding more.
+WhiteboardAI diagrams are visual communication. If text is cut off, elements overlap, or arrows cross through unrelated shapes, the diagram becomes confusing and unprofessional — it defeats the whole purpose of drawing it. So after every batch of elements, verify before adding more.
 
 ### Quality Checklist
 
@@ -142,10 +142,10 @@ If you find any issue: **stop, fix it, re-screenshot, then continue.** Say "I se
 ### Steps (CLI shown; MCP tools are 1:1 — see cheatsheet)
 
 1. Plan your coordinate grid — map out tiers and x-positions before writing JSON. (MCP mode: call `read_diagram_guide` for colors/sizing; the same guidance lives in `references/cheatsheet.md`.)
-2. Optional fresh start: `npx -y mcp-excalidraw-server clear --yes`
+2. Optional fresh start: `npx -y whiteboardai-server clear --yes`
 3. Create shapes and arrows in one call. Custom `id` fields (e.g. `"id": "auth-svc"`) make later updates easy:
    ```bash
-   npx -y mcp-excalidraw-server add - <<'EOF'
+   npx -y whiteboardai-server add - <<'EOF'
    [
      {"id": "lb", "type": "rectangle", "x": 300, "y": 50, "width": 180, "height": 60, "text": "Load Balancer"},
      {"id": "svc-a", "type": "rectangle", "x": 100, "y": 200, "width": 160, "height": 60, "text": "Web Server 1"},
@@ -201,7 +201,7 @@ The intermediate waypoint `[50, -40]` lifts the arrow upward. `roundness: {type:
 Pairing `describe` with `screenshot` is what makes this skill powerful.
 
 - **`describe`** (`describe_scene` in MCP) → structured text: element IDs, types, positions, labels, connections. Use it to know *what's on the canvas* before making programmatic updates (find IDs, understand bounding boxes).
-- **`screenshot`** (`get_canvas_screenshot` in MCP) → PNG rendered headless from the canonical canvas state with Excalidraw's own renderer (no browser tab needed, a few ms). Use it for *visual quality verification* — it shows exactly what the diagram looks like, including truncation, overlap, and arrow routing. The CLI prints the saved file path as JSON; read/view that file. `--scale 2` for legibility on dense diagrams, `--ids a,b` or `--frame <id>` to zoom in on a part, `--dark` for dark mode.
+- **`screenshot`** (`get_canvas_screenshot` in MCP) → PNG rendered headless from the canonical canvas state with WhiteboardAI's own renderer (no browser tab needed, a few ms). Use it for *visual quality verification* — it shows exactly what the diagram looks like, including truncation, overlap, and arrow routing. The CLI prints the saved file path as JSON; read/view that file. `--scale 2` for legibility on dense diagrams, `--ids a,b` or `--frame <id>` to zoom in on a part, `--dark` for dark mode.
 
 **Feedback loop:**
 ```
@@ -225,7 +225,7 @@ add elements
 ```bash
 echo 'graph TD
   A[Client] --> B[API]
-  B --> C[(DB)]' | npx -y mcp-excalidraw-server mermaid
+  B --> C[(DB)]' | npx -y whiteboardai-server mermaid
 ```
 Requires an open browser tab (conversion runs in the frontend; exit code 4 tells you to open the canvas URL). Afterwards `screenshot` to verify layout. If the auto-layout is poor (nodes crowded, edges crossing), find problem elements with `describe` and reposition them with `update`.
 
@@ -235,17 +235,17 @@ Requires an open browser tab (conversion runs in the frontend; exit code 4 tells
 - Import scene: `import diagram.excalidraw` (append) or `import diagram.excalidraw --replace`
 - Image: `screenshot --out diagram.png` / `screenshot --format svg --out diagram.svg` (headless; SVGs embed their fonts)
 - Offline: `render diagram.excalidraw --out diagram.png` renders a saved file without the canvas server (CI-friendly, same flags as `screenshot`)
-- Share link: `share` — encrypts the scene and returns a shareable excalidraw.com URL (or a self-hosted instance when `EXCALIDRAW_SHARE_UPLOAD_URL` / `EXCALIDRAW_SHARE_BASE_URL` are set)
+- Share link: `share` — encrypts the scene and returns a configured shareable URL (disabled by default; enable by setting `WHITEBOARDAI_SHARE_UPLOAD_URL` and `WHITEBOARDAI_SHARE_BASE_URL`)
 
 This is how diagrams live in a repo: commit the `.excalidraw` file, and re-`import` + edit + `export` it when the architecture changes.
 
 ### Obsidian vaults: use `.excalidraw.md`
 
-Check the destination before writing: if any ancestor directory contains `.obsidian/`, it is an Obsidian vault. A raw `.excalidraw` file there opens in the Excalidraw plugin only in **compatibility mode** ("Convert to new format" warning), gets no block references or vault-wide search, and default Obsidian Sync skips non-`.md` files. Give the export a `.excalidraw.md` extension and the CLI writes the plugin's native format automatically:
+Check the destination before writing: if any ancestor directory contains `.obsidian/`, it is an Obsidian vault. A raw `.excalidraw` file there opens in the Obsidian Excalidraw plugin only in **compatibility mode** ("Convert to new format" warning), gets no block references or vault-wide search, and default Obsidian Sync skips non-`.md` files. Give the export a `.excalidraw.md` extension and the CLI writes the plugin's native format automatically:
 
 ```bash
-npx -y mcp-excalidraw-server export --out "$VAULT/diagrams/system-map.excalidraw.md"   # .md → Obsidian format (or force with --format obsidian)
-npx -y mcp-excalidraw-server import "$VAULT/diagrams/system-map.excalidraw.md" --replace  # reads both plain and compressed Drawing blocks
+npx -y whiteboardai-server export --out "$VAULT/diagrams/system-map.excalidraw.md"   # .md → Obsidian format (or force with --format obsidian)
+npx -y whiteboardai-server import "$VAULT/diagrams/system-map.excalidraw.md" --replace  # reads both plain and compressed Drawing blocks
 ```
 
 Round-trips are safe: text-element block references follow the plugin's own id rules, so re-importing, editing, and re-exporting the same file keeps links from other notes intact.
@@ -262,13 +262,13 @@ Round-trips are safe: text-element block references follow the plugin's own id r
 
 ## Error Recovery
 
-- **Exit code 3 (canvas unreachable)?** Auto-start is disabled (`EXCALIDRAW_NO_AUTOSTART=1`) or a non-loopback `EXPRESS_SERVER_URL` is set. Run `start` explicitly or fix the env.
+- **Exit code 3 (canvas unreachable)?** Auto-start is disabled (`WHITEBOARDAI_NO_AUTOSTART=1`) or a non-loopback `EXPRESS_SERVER_URL` is set. Run `start` explicitly or fix the env.
 - **Exit code 4 (browser required)?** Only `mermaid` and `screenshot --renderer browser` need an open tab. Open `http://127.0.0.1:3000` in a browser and retry, or drop `--renderer browser` — screenshots and image exports render headless.
 - **Elements not appearing?** Check `describe` — they may be off-screen. In MCP mode, use `set_viewport` with `scrollToContent: true`, or `scrollToElementIds` plus optional `viewportZoomFactor` to focus on a specific subgraph; in a browser, press the zoom-to-fit button.
 - **Arrow not connecting?** Verify element IDs with `get <id>`. Make sure `startElementId`/`endElementId` match existing element IDs.
 - **Canvas in a bad state?** `snapshot save` first, then `clear --yes` and rebuild. Or `snapshot restore` to go back.
 - **Element won't update?** It may be locked — `arrange unlock --ids <id>` first.
-- **Duplicate text elements / element count doubling?** The frontend auto-sync timer periodically writes the full Excalidraw scene back to the server. Excalidraw internally generates a bound text element for every shape with a label; clearing and re-sending elements can re-inject cached bound texts. Clean up: `query --type text` to find elements with a `containerId`, `delete` the unwanted ones, wait a few seconds for auto-sync to settle. The safest prevention: **never put labels on background zone rectangles** — use free-standing text elements.
+- **Duplicate text elements / element count doubling?** The frontend auto-sync timer periodically writes the full WhiteboardAI scene back to the server. WhiteboardAI internally generates a bound text element for every shape with a label; clearing and re-sending elements can re-inject cached bound texts. Clean up: `query --type text` to find elements with a `containerId`, `delete` the unwanted ones, wait a few seconds for auto-sync to settle. The safest prevention: **never put labels on background zone rectangles** — use free-standing text elements.
 
 ---
 

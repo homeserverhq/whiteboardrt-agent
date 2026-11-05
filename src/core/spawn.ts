@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import logger from '../utils/logger.js';
 import { EXPRESS_SERVER_URL, EXCALIDRAW_PUBLIC_URL, ENABLE_CANVAS_SYNC, EXCALIDRAW_NO_AUTOSTART } from './config.js';
-import { getHealth, CANVAS_SERVICE_NAME, foreignServiceError, markCanvasIdentityVerified } from './canvas-client.js';
+import { getHealth, isCanvasServiceName, foreignServiceError, markCanvasIdentityVerified } from './canvas-client.js';
 
 export { foreignServiceError };
 import { readPidFile, removePidFile } from './pidfile.js';
@@ -41,7 +41,7 @@ function isLoopbackUrl(): boolean {
 function unreachableError(reason: string): Error {
   const error = new Error(
     `Canvas server is not reachable at ${EXPRESS_SERVER_URL} (${reason}). ` +
-    `Start it with \`mcp-excalidraw-server start\` or \`node dist/server.js\`.`
+    `Start it with \`whiteboardai-server start\` or \`node dist/server.js\`.`
   );
   (error as any).code = 'CANVAS_UNREACHABLE';
   return error;
@@ -58,7 +58,7 @@ async function healthOrNull(timeoutMs = 500) {
 // True only for a /health payload from OUR canvas server (v1.1+ identity
 // marker). Anything else answering the port is a foreign service.
 export function isCanvasHealth(health: { service?: string } | null): boolean {
-  return health !== null && health.service === CANVAS_SERVICE_NAME;
+  return health !== null && isCanvasServiceName(health.service);
 }
 
 export interface EnsureResult {

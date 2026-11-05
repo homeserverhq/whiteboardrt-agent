@@ -35,7 +35,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/${{ github.repository_owner }}/excalidraw-mcp
+          images: ghcr.io/${{ github.repository_owner }}/whiteboardai-mcp
           tags: |
             type=ref,event=tag
             type=match,pattern=^v(\d+\.\d+),group=1,prefix=v,priority=550

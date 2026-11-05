@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-// Single bin entry for both package bins (mcp-excalidraw-server and
-// excalidraw-canvas):
+// Single bin entry for both package bins (whiteboardai-server and
+// whiteboardai-canvas):
 //
 //   no arguments  -> MCP stdio server (backward compatible with MCP clients)
 //   <subcommand>  -> CLI

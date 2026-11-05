@@ -31,10 +31,32 @@ export const EXCALIDRAW_NO_AUTOSTART =
 export const ALLOWED_EXPORT_DIR =
   firstEnv('WHITEBOARDAI_EXPORT_DIR', 'EXCALIDRAW_EXPORT_DIR') || process.cwd();
 
-// Share target for `share` / `export_to_excalidraw_url`. Sharing stays disabled
+// Share target for `share` / `export_to_share_url`. Sharing stays disabled
 // unless both URLs are explicitly configured.
 export const EXCALIDRAW_SHARE_UPLOAD_URL =
   firstEnv('WHITEBOARDAI_SHARE_UPLOAD_URL', 'EXCALIDRAW_SHARE_UPLOAD_URL') || '';
 export const EXCALIDRAW_SHARE_BASE_URL =
   (firstEnv('WHITEBOARDAI_SHARE_BASE_URL', 'EXCALIDRAW_SHARE_BASE_URL') || '')
     .replace(/\/+$/, '');
+
+// Shared storage backend used for durable canvas persistence. Setting
+// WHITEBOARDAI_STORAGE_URL enables remote persistence directly; setting
+// WHITEBOARDAI_PERSISTENCE=remote enables it using the existing web-container
+// storage URL fallbacks.
+const remotePersistenceRequested =
+  process.env.WHITEBOARDAI_PERSISTENCE?.trim().toLowerCase() === 'remote';
+const explicitStorageUrl = firstEnv('WHITEBOARDAI_STORAGE_URL');
+export const WHITEBOARDAI_STORAGE_URL =
+  (remotePersistenceRequested
+    ? firstEnv(
+        'WHITEBOARDAI_STORAGE_URL',
+        'VITE_APP_INTERNAL_STORAGE_URL',
+        'HTTP_STORAGE_BACKEND_URL'
+      )
+    : explicitStorageUrl
+  )?.replace(/\/+$/, '') || '';
+export const WHITEBOARDAI_STORAGE_STATE_KEY =
+  process.env.WHITEBOARDAI_STORAGE_STATE_KEY?.trim() ||
+  'whiteboardai-canvas-state-v1';
+export const WHITEBOARDAI_STORAGE_FILE_PREFIX =
+  process.env.WHITEBOARDAI_STORAGE_FILE_PREFIX?.trim() || 'whiteboardai-file-';

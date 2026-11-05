@@ -309,7 +309,13 @@ export async function replaceElementsStrict(elements: ServerElement[]): Promise<
 }
 
 // Identity marker the canvas server puts in /health (v1.1+)
-export const CANVAS_SERVICE_NAME = 'mcp-excalidraw-canvas';
+export const CANVAS_SERVICE_NAME = 'whiteboardai-canvas';
+const LEGACY_CANVAS_SERVICE_NAMES = new Set(['mcp-excalidraw-canvas']);
+
+export function isCanvasServiceName(name: string | undefined): boolean {
+  return name === CANVAS_SERVICE_NAME ||
+    (name !== undefined && LEGACY_CANVAS_SERVICE_NAMES.has(name));
+}
 
 export function foreignServiceError(): Error {
   const error = new Error(
@@ -372,7 +378,7 @@ async function assertCanvasIdentity(): Promise<void> {
           health = await response.json() as { service?: string };
         } catch { /* non-JSON body: foreign */ }
 
-        if (!response.ok || health?.service !== CANVAS_SERVICE_NAME) {
+        if (!response.ok || !isCanvasServiceName(health?.service)) {
           throw foreignServiceError();
         }
         identityVerifiedAt = Date.now();
@@ -410,7 +416,7 @@ export async function isDurableCanvasStateEnabled(): Promise<boolean> {
   if (!ENABLE_CANVAS_SYNC) return false;
   try {
     const health = await getHealth();
-    return health.service === CANVAS_SERVICE_NAME && health.durable_state_enabled === true;
+    return isCanvasServiceName(health.service) && health.durable_state_enabled === true;
   } catch {
     // Preserve the existing import failure path when the canvas is unavailable.
     // The subsequent element request will perform the normal identity check and

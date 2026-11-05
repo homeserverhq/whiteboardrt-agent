@@ -1,6 +1,6 @@
 // Diagram design guide — injected into LLM context via the read_diagram_guide
 // MCP tool and reproduced in the agent skill references.
-export const DIAGRAM_DESIGN_GUIDE = `# Excalidraw Diagram Design Guide
+export const DIAGRAM_DESIGN_GUIDE = `# WhiteboardAI Diagram Design Guide
 
 ## Color Palette
 

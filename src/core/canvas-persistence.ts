@@ -26,6 +26,11 @@ import type {
   ServerElement,
   Snapshot,
 } from '../types.js';
+import {
+  WHITEBOARDAI_STORAGE_FILE_PREFIX,
+  WHITEBOARDAI_STORAGE_STATE_KEY,
+  WHITEBOARDAI_STORAGE_URL,
+} from './config.js';
 
 const STATE_SCHEMA_VERSION = 1 as const;
 const STATE_FILE_NAME = 'canvas-state-v1.json';
@@ -118,6 +123,44 @@ interface KnownDurableBlob {
 // lstat on later mutations avoids re-reading unchanged base64 payloads while
 // still detecting missing/replaced files during the running process.
 const knownDurableBlobs = new Map<string, KnownDurableBlob>();
+const knownRemoteBlobs = new Map<string, string>();
+const REMOTE_REQUEST_TIMEOUT_MS = 15_000;
+const REMOTE_REQUEST_ATTEMPTS = 3;
+
+class RemoteStateWriteError extends Error {
+  constructor(cause: unknown) {
+    super(`Failed to publish canvas checkpoint: ${
+      cause instanceof Error ? cause.message : String(cause)
+    }`, { cause });
+    this.name = 'RemoteStateWriteError';
+  }
+}
+
+export function remoteStorageEnabled(): boolean {
+  return WHITEBOARDAI_STORAGE_URL.length > 0;
+}
+
+function remoteAuthority(): string {
+  return `${WHITEBOARDAI_STORAGE_URL}/rooms/${WHITEBOARDAI_STORAGE_STATE_KEY}`;
+}
+
+function remoteFileKey(fileId: string): string {
+  return `${WHITEBOARDAI_STORAGE_FILE_PREFIX}${fileId}`;
+}
+
+function remoteStateUrl(): string {
+  return `${WHITEBOARDAI_STORAGE_URL}/rooms/${encodeURIComponent(
+    WHITEBOARDAI_STORAGE_STATE_KEY,
+  )}`;
+}
+
+function remoteFileUrl(storageKey: string): string {
+  return `${WHITEBOARDAI_STORAGE_URL}/files/${encodeURIComponent(storageKey)}`;
+}
+
+function remoteBlobCacheKey(storageKey: string): string {
+  return `${WHITEBOARDAI_STORAGE_URL}\0${storageKey}`;
+}
 
 export function durableStateDirectory(): string | null {
   const configured =
@@ -126,12 +169,15 @@ export function durableStateDirectory(): string | null {
 }
 
 export function durableStatePath(): string | null {
+  if (remoteStorageEnabled()) {
+    return remoteStateUrl();
+  }
   const directory = durableStateDirectory();
   return directory ? join(directory, STATE_FILE_NAME) : null;
 }
 
 export function durableStateEnabled(): boolean {
-  return durableStateDirectory() !== null;
+  return remoteStorageEnabled() || durableStateDirectory() !== null;
 }
 
 export function durableBlobDirectory(): string | null {
@@ -155,6 +201,86 @@ function blobRelativePath(fileId: string): string {
 
 function durableFileCacheKey(dataDirectory: string, fileId: string): string {
   return `${dataDirectory}\0${fileId}`;
+}
+
+function dataURLToBytes(dataURL: string): { bytes: Uint8Array; mimeType: string } {
+  const match = /^data:([^;,]*)(;base64)?,([\s\S]*)$/i.exec(dataURL);
+  if (!match) {
+    throw new Error('Canvas file has an invalid data URL');
+  }
+  const mimeType = match[1] || 'application/octet-stream';
+  const payload = match[3] ?? '';
+  const bytes = match[2]
+    ? Buffer.from(payload, 'base64')
+    : Buffer.from(decodeURIComponent(payload), 'utf8');
+  return { bytes: new Uint8Array(bytes), mimeType };
+}
+
+function bytesToDataURL(bytes: Uint8Array, mimeType: string): string {
+  return `data:${mimeType};base64,${Buffer.from(bytes).toString('base64')}`;
+}
+
+async function remoteFetch(url: string, init: RequestInit): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= REMOTE_REQUEST_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        ...init,
+        signal: AbortSignal.timeout(REMOTE_REQUEST_TIMEOUT_MS),
+      });
+      if (response.status >= 500 && attempt < REMOTE_REQUEST_ATTEMPTS) {
+        lastError = new Error(`Storage backend returned ${response.status}`);
+        continue;
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+      if (attempt >= REMOTE_REQUEST_ATTEMPTS) break;
+    }
+  }
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Storage backend request failed');
+}
+
+async function remoteGet(storageKey: string): Promise<Uint8Array | null> {
+  const response = await remoteFetch(remoteFileUrl(storageKey), { method: 'GET' });
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`Storage backend GET ${storageKey} failed: ${response.status}`);
+  }
+  return new Uint8Array(await response.arrayBuffer());
+}
+
+async function remotePut(storageKey: string, body: Uint8Array): Promise<void> {
+  const response = await remoteFetch(remoteFileUrl(storageKey), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/octet-stream' },
+    body,
+  });
+  if (!response.ok) {
+    throw new Error(`Storage backend PUT ${storageKey} failed: ${response.status}`);
+  }
+}
+
+async function remoteGetState(): Promise<string | null> {
+  const response = await remoteFetch(remoteStateUrl(), { method: 'GET' });
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`Storage backend GET state failed: ${response.status}`);
+  }
+  return response.text();
+}
+
+async function remotePutState(serialized: string): Promise<void> {
+  const response = await remoteFetch(remoteStateUrl(), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/octet-stream' },
+    body: Buffer.from(serialized, 'utf8'),
+  });
+  if (!response.ok) {
+    throw new Error(`Storage backend PUT state failed: ${response.status}`);
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -404,7 +530,11 @@ function ensureBlobDurable(file: ExcalidrawFile): DurableFileRecordV1 {
   };
 }
 
-function currentDurableState(): DurableCanvasStateV1 {
+function runtimeStateParts(): {
+  durableElements: ServerElement[];
+  durableSnapshots: Snapshot[];
+  runtimeFileEntries: Array<[string, ExcalidrawFile]>;
+} {
   const durableElements = Array.from(elements.entries()).map(([key, element]) => {
     if (element.id !== key) {
       throw new Error(`Canvas elements map key does not match element id: ${key}`);
@@ -436,6 +566,12 @@ function currentDurableState(): DurableCanvasStateV1 {
     new Set(runtimeFileEntries.map(([fileId]) => fileId)),
     'Canvas runtime',
   );
+
+  return { durableElements, durableSnapshots, runtimeFileEntries };
+}
+
+function currentDurableState(): DurableCanvasStateV1 {
+  const { durableElements, durableSnapshots, runtimeFileEntries } = runtimeStateParts();
   const durableFiles = runtimeFileEntries.map(([, file]) => ensureBlobDurable(file));
 
   return {
@@ -446,6 +582,57 @@ function currentDurableState(): DurableCanvasStateV1 {
     files: durableFiles,
     snapshots: durableSnapshots,
   };
+}
+
+async function ensureRemoteBlob(file: ExcalidrawFile): Promise<DurableFileRecordV1> {
+  validateRuntimeFile(file);
+
+  const storageKey = remoteFileKey(file.id);
+  const contentDigest = sha256(file.dataURL);
+  const cacheKey = remoteBlobCacheKey(storageKey);
+  const knownDigest = knownRemoteBlobs.get(cacheKey);
+
+  if (knownDigest !== undefined && knownDigest !== contentDigest) {
+    throw new CanvasFileImmutabilityError(file.id);
+  }
+
+  if (knownDigest === undefined) {
+    const { bytes } = dataURLToBytes(file.dataURL);
+    await remotePut(storageKey, bytes);
+    knownRemoteBlobs.set(cacheKey, contentDigest);
+  }
+
+  return {
+    id: file.id,
+    blob: storageKey,
+    sha256: contentDigest,
+    mimeType: file.mimeType,
+    created: file.created,
+  };
+}
+
+async function currentRemoteState(): Promise<DurableCanvasStateV1> {
+  const { durableElements, durableSnapshots, runtimeFileEntries } = runtimeStateParts();
+  const durableFiles: DurableFileRecordV1[] = [];
+  for (const [, file] of runtimeFileEntries) {
+    durableFiles.push(await ensureRemoteBlob(file));
+  }
+
+  return {
+    schemaVersion: STATE_SCHEMA_VERSION,
+    elements: durableElements,
+    files: durableFiles,
+    snapshots: durableSnapshots,
+  };
+}
+
+async function writeRemoteState(): Promise<void> {
+  const serialized = stableStringify(await currentRemoteState());
+  try {
+    await remotePutState(serialized);
+  } catch (error) {
+    throw new RemoteStateWriteError(error);
+  }
 }
 
 function writeStateFile(statePath: string): void {
@@ -571,6 +758,7 @@ function removeEmptyLockDirectory(lockDirectory: string): boolean {
 }
 
 export function acquireDurableStateLock(): void {
+  if (remoteStorageEnabled()) return;
   const dataDirectory = durableStateDirectory();
   if (!dataDirectory) return;
   if (ownedLock) {
@@ -725,7 +913,10 @@ function validateFileReferences(
   }
 }
 
-function parseFileRecord(value: unknown): DurableFileRecordV1 {
+function parseFileRecord(
+  value: unknown,
+  fileKeyForId: (fileId: string) => string,
+): DurableFileRecordV1 {
   if (!isRecord(value)) {
     throw new Error('Canvas state contains an invalid file record');
   }
@@ -738,7 +929,7 @@ function parseFileRecord(value: unknown): DurableFileRecordV1 {
   if (typeof value.id !== 'string' || value.id.length === 0) {
     throw new Error('Canvas file record has an invalid id');
   }
-  if (typeof value.blob !== 'string' || value.blob !== blobRelativePath(value.id)) {
+  if (typeof value.blob !== 'string' || value.blob !== fileKeyForId(value.id)) {
     throw new Error(`Canvas file ${value.id} has an invalid blob reference`);
   }
   if (typeof value.sha256 !== 'string' || !SHA256_PATTERN.test(value.sha256)) {
@@ -786,7 +977,10 @@ function parseSnapshotArray(value: unknown): Snapshot[] {
   return validateSnapshotArray(value, 'Canvas state snapshots');
 }
 
-function parseDurableState(raw: string): DurableCanvasStateV1 {
+function parseDurableState(
+  raw: string,
+  fileKeyForId: (fileId: string) => string = blobRelativePath,
+): DurableCanvasStateV1 {
   let value: unknown;
   try {
     value = JSON.parse(raw);
@@ -808,7 +1002,9 @@ function parseDurableState(raw: string): DurableCanvasStateV1 {
     throw new Error('Canvas state files must be an array');
   }
 
-  const parsedFiles = value.files.map(parseFileRecord);
+  const parsedFiles = value.files.map((record) =>
+    parseFileRecord(record, fileKeyForId),
+  );
   const seenFileIds = new Set<string>();
   for (const file of parsedFiles) {
     if (seenFileIds.has(file.id)) {
@@ -903,6 +1099,13 @@ function requireOwnedLock(): void {
 }
 
 function requireInitializedState(): void {
+  if (remoteStorageEnabled()) {
+    if (initializedAuthority !== remoteAuthority()) {
+      throw new Error('Remote canvas state must be loaded before mutations');
+    }
+    return;
+  }
+
   const dataDirectory = durableStateDirectory();
   if (!dataDirectory ||
       ownedLock?.directory !== join(dataDirectory, LOCK_FILE_NAME) ||
@@ -911,7 +1114,7 @@ function requireInitializedState(): void {
   }
 }
 
-export function commitCanvasMutation<T>(mutate: () => T): T {
+export async function commitCanvasMutation<T>(mutate: () => T): Promise<T> {
   const statePath = durableStatePath();
   if (!statePath) return mutate();
 
@@ -928,6 +1131,26 @@ export function commitCanvasMutation<T>(mutate: () => T): T {
   } catch (error) {
     restoreRuntimeState(backup);
     throw error;
+  }
+
+  if (remoteStorageEnabled()) {
+    try {
+      await writeRemoteState();
+    } catch (error) {
+      if (error instanceof RemoteStateWriteError) {
+        // The state PUT may have reached the store. Fence further mutations
+        // rather than risk a running scene that disagrees with restart recovery.
+        persistenceUnavailable = true;
+        throw new CanvasPersistenceError(error);
+      }
+      restoreRuntimeState(backup);
+      if (error instanceof CanvasFileImmutabilityError ||
+          error instanceof CanvasFileReferenceError) {
+        throw error;
+      }
+      throw new CanvasPersistenceError(error);
+    }
+    return value;
   }
 
   try {
@@ -956,14 +1179,87 @@ export function commitCanvasMutation<T>(mutate: () => T): T {
   return value;
 }
 
-export function loadDurableState(): DurableStateStatus {
+export async function loadDurableState(): Promise<DurableStateStatus> {
   if (initializedAuthority !== undefined) {
     throw new Error('Canvas durable state was already loaded in this process');
   }
 
-  const dataDirectory = durableStateDirectory();
   const statePath = durableStatePath();
-  if (!statePath || !dataDirectory) {
+  if (!statePath) {
+    initializedAuthority = null;
+    return {
+      enabled: false,
+      loaded: false,
+      path: null,
+      elements: elements.size,
+      files: files.size,
+      snapshots: snapshots.size,
+    };
+  }
+
+  if (remoteStorageEnabled()) {
+    const raw = await remoteGetState();
+    if (raw === null) {
+      // A configured remote authority with no checkpoint is a new empty canvas.
+      elements.clear();
+      files.clear();
+      snapshots.clear();
+      initializedAuthority = remoteAuthority();
+      return {
+        enabled: true,
+        loaded: false,
+        path: statePath,
+        elements: 0,
+        files: 0,
+        snapshots: 0,
+      };
+    }
+
+    const state = parseDurableState(raw, remoteFileKey);
+    const restoredElements = new Map(
+      state.elements.map(element => [element.id, element]),
+    );
+    const restoredFiles = new Map<string, ExcalidrawFile>();
+    for (const record of state.files) {
+      const bytes = await remoteGet(record.blob);
+      if (!bytes) {
+        throw new Error(`Canvas file ${record.id} is missing from remote storage`);
+      }
+      const dataURL = bytesToDataURL(bytes, record.mimeType);
+      if (sha256(dataURL) !== record.sha256) {
+        throw new Error(`Canvas file ${record.id} failed blob integrity verification`);
+      }
+      const hydrated: ExcalidrawFile = {
+        id: record.id,
+        dataURL,
+        mimeType: record.mimeType,
+        created: record.created,
+      };
+      validateRuntimeFile(hydrated);
+      restoredFiles.set(record.id, hydrated);
+      knownRemoteBlobs.set(remoteBlobCacheKey(record.blob), record.sha256);
+    }
+    const restoredSnapshots = new Map(
+      state.snapshots.map(snapshot => [snapshot.name, snapshot]),
+    );
+
+    replaceMap(elements, restoredElements);
+    replaceMap(files, restoredFiles);
+    replaceMap(snapshots, restoredSnapshots);
+    initializedAuthority = remoteAuthority();
+
+    return {
+      enabled: true,
+      loaded: true,
+      path: statePath,
+      elements: elements.size,
+      files: files.size,
+      snapshots: snapshots.size,
+    };
+  }
+
+  const dataDirectory = durableStateDirectory();
+  if (!dataDirectory) {
     initializedAuthority = null;
     return {
       enabled: false,

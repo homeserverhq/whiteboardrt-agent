@@ -49,6 +49,8 @@ const forbidden = [
 const allowedFiles = new Set([
   // This file intentionally matches the label in order to hide it in the editor.
   'frontend/src/utils/branding.ts',
+  // Legacy bin aliases are kept for compatibility.
+  'package.json',
 ]);
 
 let failed = false;

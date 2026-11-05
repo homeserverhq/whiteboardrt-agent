@@ -675,6 +675,7 @@ export async function callExcalidrawTool(
         };
       }
 
+      case 'export_to_share_url':
       case 'export_to_excalidraw_url': {
         logger.info('Exporting to shareable URL');
 

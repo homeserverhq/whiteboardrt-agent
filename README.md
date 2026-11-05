@@ -15,7 +15,7 @@ This repository preserves the upstream git history for provenance. WhiteboardAI 
 - Exported scene metadata now identifies WhiteboardAI as the source.
 - Added `WHITEBOARDAI_*` runtime environment variables with existing `EXCALIDRAW_*` fallbacks.
 
-The MCP server, CLI, and agent skill are documented separately in [MCP.md](./MCP.md). They still use upstream Excalidraw branding and will be rebranded in a follow-up.
+The MCP server, CLI, and agent skill are documented separately in [MCP.md](./MCP.md). They are packaged as `whiteboardai-server` with compatibility aliases for the upstream names.
 
 ## Quick start
 
@@ -55,15 +55,35 @@ The canvas server reads process environment variables at runtime. No rebuild is 
 | `WHITEBOARDAI_PUBLIC_URL` | `EXCALIDRAW_PUBLIC_URL` | Human-facing canvas URL |
 | `WHITEBOARDAI_NO_AUTOSTART` | `EXCALIDRAW_NO_AUTOSTART` | Disable canvas auto-start |
 | `WHITEBOARDAI_EXPORT_DIR` | `EXCALIDRAW_EXPORT_DIR` | Export sandbox |
-| `WHITEBOARDAI_DATA_DIR` | `EXCALIDRAW_DATA_DIR` | Durable canvas state directory |
+| `WHITEBOARDAI_DATA_DIR` | `EXCALIDRAW_DATA_DIR` | Local durable canvas state directory |
+| `WHITEBOARDAI_STORAGE_URL` | `VITE_APP_INTERNAL_STORAGE_URL` / `HTTP_STORAGE_BACKEND_URL` when `WHITEBOARDAI_PERSISTENCE=remote` | Shared storage backend URL |
+| `WHITEBOARDAI_PERSISTENCE` | — | Set `remote` to enable shared-backend persistence |
+| `WHITEBOARDAI_STORAGE_STATE_KEY` | `whiteboardai-canvas-state-v1` | Canvas checkpoint key |
+| `WHITEBOARDAI_STORAGE_FILE_PREFIX` | `whiteboardai-file-` | Image blob key prefix |
 | `WHITEBOARDAI_PNG_WORKER_TIMEOUT_MS` | `EXCALIDRAW_PNG_WORKER_TIMEOUT_MS` | PNG worker timeout |
 | `WHITEBOARDAI_RENDER_MAX_DIM` | `EXCALIDRAW_RENDER_MAX_DIM` | Maximum render dimension |
 | `WHITEBOARDAI_SHARE_UPLOAD_URL` | `EXCALIDRAW_SHARE_UPLOAD_URL` | Share upload endpoint |
 | `WHITEBOARDAI_SHARE_BASE_URL` | `EXCALIDRAW_SHARE_BASE_URL` | Share viewer base URL |
 
+### Shared storage persistence
+
+The AI canvas is designed as a single shared instance. It can persist its checkpoint and image blobs in the same storage backend used by the WhiteboardRT web container:
+
+```bash
+WHITEBOARDAI_STORAGE_URL=http://excalidraw-storage:8080/api/v2
+# or:
+WHITEBOARDAI_PERSISTENCE=remote
+```
+
+With `WHITEBOARDAI_PERSISTENCE=remote`, the existing `VITE_APP_INTERNAL_STORAGE_URL` or `HTTP_STORAGE_BACKEND_URL` is used. The storage backend stores the canvas checkpoint under `whiteboardai-canvas-state-v1` and image blobs under `whiteboardai-file-*`. This mode supports one AI canvas writer; do not run multiple AI canvas replicas against the same state key.
+
 ### Sharing
 
-Sharing is **disabled by default**. `share` and `export_to_excalidraw_url` return a configuration error unless both `WHITEBOARDAI_SHARE_UPLOAD_URL` and `WHITEBOARDAI_SHARE_BASE_URL` are set to a compatible self-hosted service.
+Sharing is **disabled by default**. `share` and `export_to_share_url` (legacy alias `export_to_excalidraw_url`) return a configuration error unless both `WHITEBOARDAI_SHARE_UPLOAD_URL` and `WHITEBOARDAI_SHARE_BASE_URL` are set to a compatible self-hosted service.
+
+## Upgrading from upstream names
+
+Deploy the new `whiteboardai-mcp` image before restarting the canvas container. The new MCP client accepts both the `whiteboardai-canvas` and legacy `mcp-excalidraw-canvas` health identities, while the new canvas reports the new identity and includes the legacy one in `legacy_service`.
 
 ## Fonts and compatibility
 

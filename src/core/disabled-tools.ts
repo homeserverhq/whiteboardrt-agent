@@ -15,14 +15,25 @@ const disabledToolNames = new Set(
     .filter(name => name.length > 0)
 );
 
+const toolAliases = new Map([
+  ['export_to_excalidraw_url', 'export_to_share_url'],
+  ['export_to_share_url', 'export_to_excalidraw_url'],
+]);
+
+const isDisabledName = (name: string): boolean => {
+  if (disabledToolNames.has(name)) return true;
+  const alias = toolAliases.get(name);
+  return alias !== undefined && disabledToolNames.has(alias);
+};
+
 const knownToolNames = new Set(tools.map(tool => tool.name));
 const unknownToolNames = [...disabledToolNames].filter(name => !knownToolNames.has(name));
 if (unknownToolNames.length > 0) {
   logger.warn(`DISABLED_TOOLS contains unknown tool name(s): ${unknownToolNames.join(', ')}`);
 }
 
-export const enabledTools = tools.filter(tool => !disabledToolNames.has(tool.name));
+export const enabledTools = tools.filter(tool => !isDisabledName(tool.name));
 
 export function isToolDisabled(name: string): boolean {
-  return disabledToolNames.has(name);
+  return isDisabledName(name);
 }

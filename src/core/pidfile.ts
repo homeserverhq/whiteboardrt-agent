@@ -9,14 +9,14 @@ import logger from '../utils/logger.js';
  */
 function stateDir(): string {
   if (process.platform === 'darwin') {
-    return path.join(homedir(), 'Library', 'Application Support', 'excalidraw-canvas');
+    return path.join(homedir(), 'Library', 'Application Support', 'whiteboardai-canvas');
   }
   if (process.platform === 'win32') {
     const base = process.env.LOCALAPPDATA || path.join(homedir(), 'AppData', 'Local');
-    return path.join(base, 'Excalidraw-Canvas');
+    return path.join(base, 'WhiteboardAI-Canvas');
   }
   const xdgState = process.env.XDG_STATE_HOME || path.join(homedir(), '.local', 'state');
-  return path.join(xdgState, 'excalidraw-canvas');
+  return path.join(xdgState, 'whiteboardai-canvas');
 }
 
 export function pidFilePath(port: number): string {

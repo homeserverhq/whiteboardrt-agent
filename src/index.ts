@@ -8,7 +8,7 @@ import { serveStdio } from '@modelcontextprotocol/server/stdio';
 import logger from './utils/logger.js';
 import { isMainModule } from './core/entry.js';
 import { ENABLE_CANVAS_SYNC, EXCALIDRAW_NO_AUTOSTART, MCP_TRANSPORT } from './core/config.js';
-import { excalidrawMcpServerFactory } from './core/mcp-server.js';
+import { whiteboardAiMcpServerFactory } from './core/mcp-server.js';
 import { ensureCanvasReadyForMcpTool } from './core/canvas-state.js';
 
 export interface ServerHandle {
@@ -29,7 +29,7 @@ function startCanvasAutoStart(): void {
 // Start server
 async function runServer(): Promise<ServerHandle> {
   try {
-    logger.info(`Starting Excalidraw MCP server (transport: ${MCP_TRANSPORT})...`);
+    logger.info(`Starting WhiteboardAI MCP server (transport: ${MCP_TRANSPORT})...`);
 
     if (MCP_TRANSPORT === 'http') {
       // Loaded lazily so stdio mode never pulls in the HTTP/Express graph.
@@ -43,13 +43,13 @@ async function runServer(): Promise<ServerHandle> {
     // request pins a 2025-era instance, while a `server/discover` probe — or
     // any request carrying the 2026-07-28 `_meta` envelope, including a
     // `tools/call` sent without any handshake at all — pins a modern one.
-    const handle = serveStdio(excalidrawMcpServerFactory, {
+    const handle = serveStdio(whiteboardAiMcpServerFactory, {
       onerror: error => {
         logger.warn('MCP stdio connection error:', error.message);
       }
     });
 
-    logger.info('Excalidraw MCP server running on stdio');
+    logger.info('WhiteboardAI MCP server running on stdio');
     startCanvasAutoStart();
     process.stdin.resume();
 
@@ -90,6 +90,11 @@ if (isMainModule(import.meta.url)) {
   });
 }
 
-export { createExcalidrawMcpServer, excalidrawMcpServerFactory } from './core/mcp-server.js';
+export {
+  createExcalidrawMcpServer,
+  createWhiteboardAiMcpServer,
+  excalidrawMcpServerFactory,
+  whiteboardAiMcpServerFactory,
+} from './core/mcp-server.js';
 export { runServer };
 export default runServer;
