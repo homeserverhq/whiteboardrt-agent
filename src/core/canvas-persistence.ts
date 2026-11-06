@@ -27,9 +27,9 @@ import type {
   Snapshot,
 } from '../types.js';
 import {
-  WHITEBOARDAI_STORAGE_FILE_PREFIX,
-  WHITEBOARDAI_STORAGE_STATE_KEY,
-  WHITEBOARDAI_STORAGE_URL,
+  WHITEBOARD_RT_AGENT_STORAGE_FILE_PREFIX,
+  WHITEBOARD_RT_AGENT_STORAGE_STATE_KEY,
+  WHITEBOARD_RT_AGENT_STORAGE_URL,
 } from './config.js';
 
 const STATE_SCHEMA_VERSION = 1 as const;
@@ -137,34 +137,33 @@ class RemoteStateWriteError extends Error {
 }
 
 export function remoteStorageEnabled(): boolean {
-  return WHITEBOARDAI_STORAGE_URL.length > 0;
+  return WHITEBOARD_RT_AGENT_STORAGE_URL.length > 0;
 }
 
 function remoteAuthority(): string {
-  return `${WHITEBOARDAI_STORAGE_URL}/rooms/${WHITEBOARDAI_STORAGE_STATE_KEY}`;
+  return `${WHITEBOARD_RT_AGENT_STORAGE_URL}/rooms/${WHITEBOARD_RT_AGENT_STORAGE_STATE_KEY}`;
 }
 
 function remoteFileKey(fileId: string): string {
-  return `${WHITEBOARDAI_STORAGE_FILE_PREFIX}${fileId}`;
+  return `${WHITEBOARD_RT_AGENT_STORAGE_FILE_PREFIX}${fileId}`;
 }
 
 function remoteStateUrl(): string {
-  return `${WHITEBOARDAI_STORAGE_URL}/rooms/${encodeURIComponent(
-    WHITEBOARDAI_STORAGE_STATE_KEY,
+  return `${WHITEBOARD_RT_AGENT_STORAGE_URL}/rooms/${encodeURIComponent(
+    WHITEBOARD_RT_AGENT_STORAGE_STATE_KEY,
   )}`;
 }
 
 function remoteFileUrl(storageKey: string): string {
-  return `${WHITEBOARDAI_STORAGE_URL}/files/${encodeURIComponent(storageKey)}`;
+  return `${WHITEBOARD_RT_AGENT_STORAGE_URL}/files/${encodeURIComponent(storageKey)}`;
 }
 
 function remoteBlobCacheKey(storageKey: string): string {
-  return `${WHITEBOARDAI_STORAGE_URL}\0${storageKey}`;
+  return `${WHITEBOARD_RT_AGENT_STORAGE_URL}\0${storageKey}`;
 }
 
 export function durableStateDirectory(): string | null {
-  const configured =
-    process.env.WHITEBOARDAI_DATA_DIR?.trim() || process.env.EXCALIDRAW_DATA_DIR?.trim();
+  const configured = process.env.WHITEBOARD_RT_AGENT_DATA_DIR?.trim();
   return configured ? resolve(configured) : null;
 }
 

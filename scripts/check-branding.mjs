@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Guard the WhiteboardAI canvas surface against Excalidraw-owned endpoints and
-// product names. The embedded @excalidraw/excalidraw bundle is intentionally
-// out of scope here; runtime network checks cover it separately.
+// Guard the WhiteboardRT Agent surface against stale product names and
+// Excalidraw-owned endpoints. The embedded @excalidraw/excalidraw bundle and
+// .excalidraw file-format references are intentionally out of scope.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,30 +11,37 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const files = [
   'README.md',
+  'MCP.md',
+  'Dockerfile',
   'Dockerfile.canvas',
   'docker-compose.yml',
+  'package.json',
   'frontend/index.html',
-  'src/server.ts',
-  'src/core/brand.ts',
-  'src/core/config.ts',
-  'src/core/scene-io.ts',
-  'src/core/share-url.ts',
+  'scripts/sync-skills.mjs',
 ];
 
-const walk = (directory) => {
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    const full = path.join(directory, entry.name);
-    if (entry.isDirectory()) {
-      walk(full);
-    } else if (/\.(css|ts|tsx)$/.test(entry.name)) {
-      files.push(path.relative(root, full));
+for (const directory of ['frontend/src', 'src', 'skills/whiteboardrt-agent-skill']) {
+  const walk = (current) => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (/\.(css|json|md|ts|tsx)$/.test(entry.name)) {
+        files.push(path.relative(root, full));
+      }
     }
-  }
-};
-
-walk(path.join(root, 'frontend/src'));
+  };
+  walk(path.join(root, directory));
+}
 
 const forbidden = [
+  /WhiteboardAI/,
+  /whiteboardai/,
+  /WHITEBOARDAI/,
+  /mcp-excalidraw-server/,
+  /excalidraw-canvas/,
+  /mcp-excalidraw-canvas/,
+  /export_to_excalidraw_url/,
   /plus\.excalidraw/i,
   /app\.excalidraw/i,
   /docs\.excalidraw/i,
@@ -49,8 +56,6 @@ const forbidden = [
 const allowedFiles = new Set([
   // This file intentionally matches the label in order to hide it in the editor.
   'frontend/src/utils/branding.ts',
-  // Legacy bin aliases are kept for compatibility.
-  'package.json',
 ]);
 
 let failed = false;

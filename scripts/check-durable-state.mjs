@@ -45,8 +45,8 @@ function spawnCanvas(canvasDataDirectory, port, preload) {
     HOST: '127.0.0.1',
     LOG_LEVEL: 'error',
   };
-  if (canvasDataDirectory === null) delete env.EXCALIDRAW_DATA_DIR;
-  else env.EXCALIDRAW_DATA_DIR = canvasDataDirectory;
+  if (canvasDataDirectory === null) delete env.WHITEBOARD_RT_AGENT_DATA_DIR;
+  else env.WHITEBOARD_RT_AGENT_DATA_DIR = canvasDataDirectory;
 
   const args = preload ? ['--import', preload, ...runtimeArgs] : runtimeArgs;
   const child = spawn(runtime, args, {
@@ -437,7 +437,7 @@ try {
       const original = fs.fsyncSync;
       fs.fsyncSync = function(fd) {
         if (fs.existsSync(${JSON.stringify(publicationMarker)}) &&
-            fs.existsSync(join(process.env.EXCALIDRAW_DATA_DIR, 'canvas-state-v1.json')) &&
+            fs.existsSync(join(process.env.WHITEBOARD_RT_AGENT_DATA_DIR, 'canvas-state-v1.json')) &&
             fs.fstatSync(fd).isDirectory()) {
           throw Object.assign(new Error('injected directory flush failure'), { code: 'EIO' });
         }

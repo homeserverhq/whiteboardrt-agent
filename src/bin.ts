@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-// Single bin entry for both package bins (whiteboardai-server and
-// whiteboardai-canvas):
+// Single bin entry for both package bins (whiteboardrt-agent-server and
+// whiteboardrt-agent-canvas):
 //
-//   no arguments  -> MCP stdio server (backward compatible with MCP clients)
+//   no arguments  -> MCP stdio server (for MCP clients)
 //   <subcommand>  -> CLI
 //
 // IMPORTANT: never statically import ./index.js or ./server.js here.

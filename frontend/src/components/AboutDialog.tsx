@@ -14,15 +14,15 @@ export const AboutDialog = ({
   }
 
   return (
-    <div className="whiteboardai-about-backdrop" onClick={onClose}>
+    <div className="whiteboardrt-agent-about-backdrop" onClick={onClose}>
       <div
-        className="whiteboardai-about"
+        className="whiteboardrt-agent-about"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="whiteboardai-about-title"
+        aria-labelledby="whiteboardrt-agent-about-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id="whiteboardai-about-title">About {PRODUCT_NAME}</h2>
+        <h2 id="whiteboardrt-agent-about-title">About {PRODUCT_NAME}</h2>
         <p>
           {PRODUCT_NAME} is a live canvas for AI agents to draw, inspect, and
           refine diagrams.

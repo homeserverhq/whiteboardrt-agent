@@ -43,7 +43,7 @@ function exchange(messages, expected, extraEnv = {}) {
       env: {
         ...process.env,
         ENABLE_CANVAS_SYNC: 'false',
-        EXCALIDRAW_NO_AUTOSTART: '1',
+        WHITEBOARD_RT_AGENT_NO_AUTOSTART: '1',
         LOG_LEVEL: 'error',
         ...extraEnv
       },

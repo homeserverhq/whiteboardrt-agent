@@ -28,7 +28,7 @@ function splitBuffers(buf) {
 
 function readConfig(env) {
   const out = execFileSync(process.execPath, ['--input-type=module', '-e',
-    "const c = await import('./dist/core/config.js'); console.log(JSON.stringify([c.EXCALIDRAW_SHARE_UPLOAD_URL, c.EXCALIDRAW_SHARE_BASE_URL]))"],
+    "const c = await import('./dist/core/config.js'); console.log(JSON.stringify([c.AGENT_SHARE_UPLOAD_URL, c.AGENT_SHARE_BASE_URL]))"],
     { env: { PATH: process.env.PATH, ...env } });
   return JSON.parse(out.toString());
 }
@@ -38,17 +38,8 @@ await check('config: sharing is disabled by default', async () => {
 });
 
 await check('config: blank upload stays disabled, trailing slashes are trimmed', async () => {
-  assert.deepEqual(readConfig({ EXCALIDRAW_SHARE_UPLOAD_URL: '  ', EXCALIDRAW_SHARE_BASE_URL: 'https://draw.example.com//' }),
+  assert.deepEqual(readConfig({ WHITEBOARD_RT_AGENT_SHARE_UPLOAD_URL: '  ', WHITEBOARD_RT_AGENT_SHARE_BASE_URL: 'https://draw.example.com//' }),
     ['', 'https://draw.example.com']);
-});
-
-await check('config: WHITEBOARDAI names take precedence over legacy names', async () => {
-  assert.deepEqual(readConfig({
-    WHITEBOARDAI_SHARE_UPLOAD_URL: 'https://new.example.com/upload/',
-    WHITEBOARDAI_SHARE_BASE_URL: 'https://new.example.com/',
-    EXCALIDRAW_SHARE_UPLOAD_URL: 'https://old.example.com/upload/',
-    EXCALIDRAW_SHARE_BASE_URL: 'https://old.example.com/'
-  }), ['https://new.example.com/upload/', 'https://new.example.com']);
 });
 
 await check('share: disabled without configuration', async () => {
@@ -73,8 +64,8 @@ const server = http.createServer((req, res) => {
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const { port } = server.address();
 
-process.env.EXCALIDRAW_SHARE_UPLOAD_URL = `http://127.0.0.1:${port}/api/v2/scenes/`;
-process.env.EXCALIDRAW_SHARE_BASE_URL = 'https://draw.example.com/';
+process.env.WHITEBOARD_RT_AGENT_SHARE_UPLOAD_URL = `http://127.0.0.1:${port}/api/v2/scenes/`;
+process.env.WHITEBOARD_RT_AGENT_SHARE_BASE_URL = 'https://draw.example.com/';
 const { exportToExcalidrawUrl } = await import('../dist/core/share-url.js');
 
 const elements = [
@@ -97,7 +88,7 @@ await check('share: uploads to the configured URL and builds the link from the c
   const [, data] = splitBuffers(new Uint8Array(zlib.inflateSync(plain)));
   const scene = JSON.parse(Buffer.from(data));
   assert.equal(scene.type, 'excalidraw');
-  assert.equal(scene.source, 'WhiteboardAI');
+  assert.equal(scene.source, 'WhiteboardRT Agent');
   assert.deepEqual(scene.elements.map((e) => e.id).sort(), ['a', 'b']);
 });
 

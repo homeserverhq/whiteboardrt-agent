@@ -11,7 +11,7 @@ const IMAGE_RENDER_PROPERTIES = {
   renderer: {
     type: 'string',
     enum: ['auto', 'node', 'browser'],
-    description: '"auto" (default) renders headless in the canvas server, no browser needed. "browser" asks an open canvas tab to render with WhiteboardAI itself (reference rendering, slower).'
+    description: '"auto" (default) renders headless in the canvas server, no browser needed. "browser" asks an open canvas tab to render with WhiteboardRT Agent itself (reference rendering, slower).'
   },
   dark: {
     type: 'boolean',
@@ -44,7 +44,7 @@ const IMAGE_RENDER_PROPERTIES = {
 export const tools: Tool[] = [
   {
     name: 'create_element',
-    description: 'Create a new WhiteboardAI element. For arrows, use startElementId/endElementId to bind to shapes (auto-routes to edges).',
+    description: 'Create a new WhiteboardRT Agent element. For arrows, use startElementId/endElementId to bind to shapes (auto-routes to edges).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -76,7 +76,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'update_element',
-    description: 'Update an existing WhiteboardAI element',
+    description: 'Update an existing WhiteboardRT Agent element',
     inputSchema: {
       type: 'object',
       properties: {
@@ -104,7 +104,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'delete_element',
-    description: 'Delete a WhiteboardAI element',
+    description: 'Delete a WhiteboardRT Agent element',
     inputSchema: {
       type: 'object',
       properties: {
@@ -115,7 +115,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'query_elements',
-    description: 'Query WhiteboardAI elements with optional filters',
+    description: 'Query WhiteboardRT Agent elements with optional filters',
     inputSchema: {
       type: 'object',
       properties: {
@@ -142,7 +142,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'get_resource',
-    description: 'Get a WhiteboardAI resource',
+    description: 'Get a WhiteboardRT Agent resource',
     inputSchema: {
       type: 'object',
       properties: {
@@ -245,7 +245,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'create_from_mermaid',
-    description: 'Convert a Mermaid diagram to WhiteboardAI elements and render them on the canvas',
+    description: 'Convert a Mermaid diagram to WhiteboardRT Agent elements and render them on the canvas',
     inputSchema: {
       type: 'object',
       properties: {
@@ -280,7 +280,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'batch_create_elements',
-    description: 'Create multiple WhiteboardAI elements at once. For arrows, use startElementId/endElementId to bind arrows to shapes — WhiteboardAI auto-routes to element edges. Assign custom id to shapes so arrows can reference them.',
+    description: 'Create multiple WhiteboardRT Agent elements at once. For arrows, use startElementId/endElementId to bind arrows to shapes — WhiteboardRT Agent auto-routes to element edges. Assign custom id to shapes so arrows can reference them.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -321,7 +321,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'get_element',
-    description: 'Get a single WhiteboardAI element by ID',
+    description: 'Get a single WhiteboardRT Agent element by ID',
     inputSchema: {
       type: 'object',
       properties: {
@@ -376,7 +376,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'export_to_image',
-    description: 'Export the current canvas to a PNG or SVG image. Renders headless in the canvas server (no browser tab needed); SVGs embed fonts. Set embedScene: true for a PNG that is also editable in WhiteboardAI.',
+    description: 'Export the current canvas to a PNG or SVG image. Renders headless in the canvas server (no browser tab needed); SVGs embed fonts. Set embedScene: true for a PNG that is also editable in WhiteboardRT Agent.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -459,7 +459,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'read_diagram_guide',
-    description: 'Returns a comprehensive design guide for creating beautiful WhiteboardAI diagrams: color palette, sizing rules, layout patterns, arrow binding best practices, diagram templates, and anti-patterns. Call this before creating diagrams to produce professional results.',
+    description: 'Returns a comprehensive design guide for creating beautiful WhiteboardRT Agent diagrams: color palette, sizing rules, layout patterns, arrow binding best practices, diagram templates, and anti-patterns. Call this before creating diagrams to produce professional results.',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -468,14 +468,6 @@ export const tools: Tool[] = [
   {
     name: 'export_to_share_url',
     description: 'Export the current canvas to a shareable URL when sharing is configured. The diagram is encrypted and uploaded; anyone with the URL can view it. Returns the shareable link.',
-    inputSchema: {
-      type: 'object',
-      properties: {}
-    }
-  },
-  {
-    name: 'export_to_excalidraw_url',
-    description: 'Deprecated alias for export_to_share_url.',
     inputSchema: {
       type: 'object',
       properties: {}

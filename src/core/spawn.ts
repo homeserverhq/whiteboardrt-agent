@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import logger from '../utils/logger.js';
-import { EXPRESS_SERVER_URL, EXCALIDRAW_PUBLIC_URL, ENABLE_CANVAS_SYNC, EXCALIDRAW_NO_AUTOSTART } from './config.js';
+import { EXPRESS_SERVER_URL, AGENT_PUBLIC_URL, ENABLE_CANVAS_SYNC, AGENT_NO_AUTOSTART } from './config.js';
 import { getHealth, isCanvasServiceName, foreignServiceError, markCanvasIdentityVerified } from './canvas-client.js';
 
 export { foreignServiceError };
@@ -41,7 +41,7 @@ function isLoopbackUrl(): boolean {
 function unreachableError(reason: string): Error {
   const error = new Error(
     `Canvas server is not reachable at ${EXPRESS_SERVER_URL} (${reason}). ` +
-    `Start it with \`whiteboardai-server start\` or \`node dist/server.js\`.`
+    `Start it with \`whiteboardrt-agent-server start\` or \`node dist/server.js\`.`
   );
   (error as any).code = 'CANVAS_UNREACHABLE';
   return error;
@@ -92,8 +92,8 @@ export async function ensureCanvasRunning(options: { timeoutMs?: number; force?:
   }
 
   if (!options.force) {
-    if (EXCALIDRAW_NO_AUTOSTART) {
-      throw unreachableError('auto-start disabled by EXCALIDRAW_NO_AUTOSTART=1');
+    if (AGENT_NO_AUTOSTART) {
+      throw unreachableError('auto-start disabled by AGENT_NO_AUTOSTART=1');
     }
     if (!ENABLE_CANVAS_SYNC) {
       throw unreachableError('auto-start disabled because ENABLE_CANVAS_SYNC=false');
@@ -119,7 +119,7 @@ export async function ensureCanvasRunning(options: { timeoutMs?: number; force?:
     if (isCanvasHealth(await healthOrNull(400))) {
       markCanvasIdentityVerified();
       process.stderr.write(
-        `Canvas server running at ${EXCALIDRAW_PUBLIC_URL} — screenshots render headless; open it in a browser to watch or for mermaid conversion.\n`
+        `Canvas server running at ${AGENT_PUBLIC_URL} — screenshots render headless; open it in a browser to watch or for mermaid conversion.\n`
       );
       return { url: EXPRESS_SERVER_URL, spawned: true };
     }

@@ -15,7 +15,7 @@ import { decodeSceneInput } from '../../core/scene-input.js';
 import { wrapSceneAsObsidianMd } from '../../core/obsidian-md.js';
 import { describeScene } from '../../core/describe.js';
 import { exportToExcalidrawUrl } from '../../core/share-url.js';
-import { EXCALIDRAW_PUBLIC_URL } from '../../core/config.js';
+import { AGENT_PUBLIC_URL } from '../../core/config.js';
 import { IMAGE_FLAG_SPEC, imageFormatFromFlags, imageOptionsFromFlags } from '../image-options.js';
 
 async function readFileOrStdin(inputPath: string | undefined): Promise<Buffer> {
@@ -107,7 +107,7 @@ export async function importCmd(argv: string[]): Promise<void> {
 
   const mode = flags.replace ? 'replace' as const : 'merge' as const;
   // Read the file here rather than via importScene's filePath: that path is
-  // sandboxed to EXCALIDRAW_EXPORT_DIR for the MCP server, but a user-invoked
+  // sandboxed to WHITEBOARD_RT_AGENT_EXPORT_DIR for the MCP server, but a user-invoked
   // CLI should import from wherever it is pointed.
   const data = decodeSceneInput(await readFileOrStdin(positionals[0]));
   if (!data.trim()) {
@@ -131,7 +131,7 @@ export async function mermaid(argv: string[]): Promise<void> {
   await requireBrowserClient('mermaid conversion');
 
   const result = await sendMermaid(diagram);
-  note(`Conversion happens in the open canvas tab at ${EXCALIDRAW_PUBLIC_URL}.`);
+  note(`Conversion happens in the open canvas tab at ${AGENT_PUBLIC_URL}.`);
   printJson({ success: result.success ?? true, message: result.message });
 }
 

@@ -1,4 +1,4 @@
-# Dockerfile for the WhiteboardAI MCP server
+# Dockerfile for the WhiteboardRT Agent MCP server
 # This builds the MCP server only (core product for CI/CD and GHCR)
 # The canvas server is optional and runs separately
 
@@ -59,7 +59,7 @@ ENV ENABLE_CANVAS_SYNC=true
 ENV LOG_LEVEL=info
 # This image has no frontend build — auto-starting a canvas here would serve
 # a blank UI. The canvas runs as its own service (see docker-compose.yml).
-ENV WHITEBOARDAI_NO_AUTOSTART=1
+ENV WHITEBOARD_RT_AGENT_NO_AUTOSTART=1
 # Set MCP_TRANSPORT=http to serve the MCP tools over streamable HTTP on
 # MCP_PORT (default 3100) instead of stdio.
 ENV MCP_TRANSPORT=stdio
@@ -70,5 +70,5 @@ CMD ["node", "dist/index.js"]
 
 # Labels for metadata
 LABEL org.opencontainers.image.source="https://github.com/homeserverhq/excalidraw-ai"
-LABEL org.opencontainers.image.description="WhiteboardAI MCP Server - Model Context Protocol for AI agents"
+LABEL org.opencontainers.image.description="WhiteboardRT Agent MCP Server - Model Context Protocol for AI agents"
 LABEL org.opencontainers.image.licenses="MIT"

@@ -4,7 +4,7 @@ import { createMcpHandler } from '@modelcontextprotocol/server';
 import { toNodeHandler } from '@modelcontextprotocol/node';
 import logger from '../utils/logger.js';
 import { MCP_HOST, MCP_PORT } from './config.js';
-import { whiteboardAiMcpServerFactory } from './mcp-server.js';
+import { whiteboardRtAgentMcpServerFactory } from './mcp-server.js';
 
 export interface HttpServerHandle {
   close(): Promise<void>;
@@ -19,7 +19,7 @@ export interface HttpServerHandle {
  * session map needs to be maintained here.
  */
 export async function runHttpServer(): Promise<HttpServerHandle> {
-  const handler = createMcpHandler(whiteboardAiMcpServerFactory, {
+  const handler = createMcpHandler(whiteboardRtAgentMcpServerFactory, {
     legacy: 'stateless',
     onerror: error => logger.warn('MCP HTTP handler error:', error.message)
   });
@@ -71,7 +71,7 @@ export async function runHttpServer(): Promise<HttpServerHandle> {
     server.on('error', reject);
   });
 
-  logger.info(`WhiteboardAI MCP server listening on http://${MCP_HOST}:${MCP_PORT}`);
+  logger.info(`WhiteboardRT Agent MCP server listening on http://${MCP_HOST}:${MCP_PORT}`);
 
   return {
     close: async () => {

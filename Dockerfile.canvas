@@ -180,5 +180,5 @@ CMD ["node", "dist/server.js"]
 
 # Labels for metadata
 LABEL org.opencontainers.image.source="https://github.com/homeserverhq/excalidraw-ai"
-LABEL org.opencontainers.image.description="WhiteboardAI Canvas Server - Web UI and REST API"
+LABEL org.opencontainers.image.description="WhiteboardRT Agent Canvas Server - Web UI and REST API"
 LABEL org.opencontainers.image.licenses="MIT"

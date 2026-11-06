@@ -138,7 +138,7 @@ function runCli(args) {
   return new Promise(resolve => {
     const cli = spawn(process.execPath, [join(repoRoot, 'dist', 'bin.js'), ...args], {
       cwd: repoRoot,
-      env: { ...process.env, EXPRESS_SERVER_URL: baseUrl, EXCALIDRAW_NO_AUTOSTART: '1', LOG_LEVEL: 'error' },
+      env: { ...process.env, EXPRESS_SERVER_URL: baseUrl, WHITEBOARD_RT_AGENT_NO_AUTOSTART: '1', LOG_LEVEL: 'error' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let out = '';

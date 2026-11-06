@@ -1,17 +1,17 @@
-# WhiteboardAI MCP Server, CLI & Agent Skill
+# WhiteboardRT Agent MCP Server, CLI & Agent Skill
 
-> This document covers the WhiteboardAI MCP server, CLI, and agent skill. The
-> WhiteboardAI canvas container is documented in [README.md](./README.md).
+> This document covers the WhiteboardRT Agent MCP server, CLI, and agent skill. The
+> WhiteboardRT Agent canvas container is documented in [README.md](./README.md).
 
-**whiteboardai-server** gives AI agents a live WhiteboardAI canvas they can draw on, look at, refine, and save into your repo. Your agent creates architecture diagrams and flowcharts programmatically, **sees its own work via screenshots**, fixes layout problems, and exports `.excalidraw` files you can commit next to your code.
+**whiteboardrt-agent-server** gives AI agents a live WhiteboardRT Agent canvas they can draw on, look at, refine, and save into your repo. Your agent creates architecture diagrams and flowcharts programmatically, **sees its own work via screenshots**, fixes layout problems, and exports `.excalidraw` files you can commit next to your code.
 
 One canvas, three ways to drive it:
 
-- **Agent Skill + CLI** — recommended for coding agents (Claude Code, Codex CLI, Cursor, OpenCode): `npx -y whiteboardai-server <command>`. Zero config, auto-starts the canvas, composable JSON in/out.
-- **MCP Server** — 27 tools over stdio (26 canonical plus the deprecated share-link alias) for any Model Context Protocol client (Claude Desktop, Cursor, Codex CLI, Antigravity, ...). Speaks MCP `2026-07-28` (`server/discover`, per-request `_meta` envelope, tool calls without a handshake) and stays compatible with 2025-era clients that open with `initialize`.
+- **Agent Skill + CLI** — recommended for coding agents (Claude Code, Codex CLI, Cursor, OpenCode): `npx -y whiteboardrt-agent-server <command>`. Zero config, auto-starts the canvas, composable JSON in/out.
+- **MCP Server** — 26 tools over stdio for any Model Context Protocol client (Claude Desktop, Cursor, Codex CLI, Antigravity, ...). Speaks MCP `2026-07-28` (`server/discover`, per-request `_meta` envelope, tool calls without a handshake) and stays compatible with 2025-era clients that open with `initialize`.
 - **REST API** — plain HTTP for LangChain and custom frameworks.
 
-Core drawing runs locally (Node ≥ 20, MIT licensed) — no API keys or accounts. Mermaid conversion runs in the local browser canvas. Sharing is disabled unless configured with `WHITEBOARDAI_SHARE_UPLOAD_URL` and `WHITEBOARDAI_SHARE_BASE_URL`. The canvas loads fonts from the canvas server's own `/assets/fonts` route.
+Core drawing runs locally (Node ≥ 20, MIT licensed) — no API keys or accounts. Mermaid conversion runs in the local browser canvas. Sharing is disabled unless configured with `WHITEBOARD_RT_AGENT_SHARE_UPLOAD_URL` and `WHITEBOARD_RT_AGENT_SHARE_BASE_URL`. The canvas loads fonts from the canvas server's own `/assets/fonts` route.
 
 ## Table of Contents
 
@@ -29,7 +29,7 @@ Core drawing runs locally (Node ≥ 20, MIT licensed) — no API keys or account
   - [Codex CLI](#codex-cli)
   - [OpenCode](#opencode)
   - [Antigravity (Google)](#antigravity-google)
-- [MCP Tools (27 Total)](#mcp-tools-27-total)
+- [MCP Tools (26 Total)](#mcp-tools-26-total)
 - [Quick Start (From Source / Docker)](#quick-start-from-source--docker)
 - [Testing](#testing)
 - [FAQ](#faq)
@@ -40,14 +40,14 @@ Core drawing runs locally (Node ≥ 20, MIT licensed) — no API keys or account
 
 ## What It Is
 
-Ask your agent to *"draw the architecture of this service"* and it produces a real, editable WhiteboardAI diagram — not a one-shot image. Because the agent can query, screenshot, and update individual elements, it iterates until labels fit, nothing overlaps, and arrows route cleanly; then it exports the result as a `.excalidraw` file that lives in your repo and gets updated when the code changes.
+Ask your agent to *"draw the architecture of this service"* and it produces a real, editable WhiteboardRT Agent diagram — not a one-shot image. Because the agent can query, screenshot, and update individual elements, it iterates until labels fit, nothing overlaps, and arrows route cleanly; then it exports the result as a `.excalidraw` file that lives in your repo and gets updated when the code changes.
 
 Under the hood there are two processes, one product:
 
-- **Canvas server**: WhiteboardAI web UI + REST API + WebSocket real-time sync (default `http://127.0.0.1:3000`)
+- **Canvas server**: WhiteboardRT Agent web UI + REST API + WebSocket real-time sync (default `http://127.0.0.1:3000`)
 - **A thin front-end of your choice**: the CLI, the MCP stdio server, or raw HTTP — all drive the same canvas
 
-Since v1.1 the canvas server starts itself: canvas-driving CLI commands (and the MCP server on launch) auto-spawn it if nothing is listening. `status` only inspects the current server state. Set `WHITEBOARDAI_NO_AUTOSTART=1` to opt out.
+Since v1.1 the canvas server starts itself: canvas-driving CLI commands (and the MCP server on launch) auto-spawn it if nothing is listening. `status` only inspects the current server state. Set `WHITEBOARD_RT_AGENT_NO_AUTOSTART=1` to opt out.
 
 ## How We Differ from the Official Excalidraw MCP
 
@@ -55,7 +55,7 @@ Excalidraw has an [official MCP](https://github.com/excalidraw/excalidraw-mcp) �
 
 | | Official Excalidraw MCP | This Project |
 |---|---|---|
-| **Approach** | Prompt in, diagram out (one-shot widget) | Programmatic element-level control (CLI + 27 MCP tools) |
+| **Approach** | Prompt in, diagram out (one-shot widget) | Programmatic element-level control (CLI + 26 MCP tools) |
 | **State** | Checkpoints inside the chat widget | Live canvas with real-time sync and optional restart-safe checkpoints |
 | **Element CRUD** | Declarative re-send with delete markers | Full create / read / update / delete per element |
 | **AI sees the canvas** | No | `describe` (structured text) + `screenshot` (image) |
@@ -69,7 +69,7 @@ Excalidraw has an [official MCP](https://github.com/excalidraw/excalidraw-mcp) �
 | **Works without MCP** | No | Yes — CLI + agent skill + REST API |
 | **Multi-agent** | Single chat | Multiple agents on the same canvas concurrently |
 
-**TL;DR** — The official Excalidraw MCP shows diagrams in your chat. This project gives your coding agent a full WhiteboardAI workbench: a canvas it can draw on, inspect, refine, and commit to your repo.
+**TL;DR** — The official Excalidraw MCP shows diagrams in your chat. This project gives your coding agent a full WhiteboardRT Agent workbench: a canvas it can draw on, inspect, refine, and commit to your repo.
 
 ## What's New
 
@@ -92,7 +92,7 @@ Current package version: **2.1.2**. The current release line is **v2.1 — Headl
 
 - **Screenshots and image exports no longer need a browser tab.** `screenshot`, `export_to_image` and `get_canvas_screenshot` render inside the canvas server: the canvas exporter runs under Node (jsdom) and resvg rasterizes to PNG with bundled Excalifont/Virgil/Cascadia/Liberation fonts. Same output as the tab, deterministic (byte-identical for an unchanged scene), a few milliseconds per render, works in CI and Docker. See [Headless Rendering](#headless-rendering).
 - **New render options** on the CLI, REST and MCP: `dark`, `scale` (1–4), `padding`, `elementIds` (render a subset), `frameId` (render one frame), `embedFonts`. `--renderer browser` keeps the old tab path.
-- **New `render` command**: `npx -y whiteboardai-server render docs/arch.excalidraw --out docs/arch.png` renders a committed file offline — no canvas server at all.
+- **New `render` command**: `npx -y whiteboardrt-agent-server render docs/arch.excalidraw --out docs/arch.png` renders a committed file offline — no canvas server at all.
 - Shapes created without `width`/`height` now default to 100×100 in exports and renders (matching the canvas) instead of collapsing to 0×0.
 - Text stored with `width: 0, height: 0` (scenes from pre-2.0 servers) is re-measured on export instead of exporting invisible. (#107)
 
@@ -100,7 +100,7 @@ Current package version: **2.1.2**. The current release line is **v2.1 — Headl
 
 - **Breaking: Node >= 20 required** (was 18) — the MCP TypeScript SDK v2 sets the floor. Everything else is backward compatible, including existing MCP client configs.
 - **MCP protocol revision 2026-07-28**: modern clients can call tools statelessly without an initialization handshake (`server/discover`, per-request `_meta` envelopes); legacy initialization-based clients keep working unchanged. (#98, thanks @anxkhn)
-- **Exports render everywhere now**: `.excalidraw` / `.excalidraw.md` files contain real WhiteboardAI elements — shape and arrow labels as bound text, live arrow bindings — so they open correctly on excalidraw.com and in the Obsidian Excalidraw plugin instead of losing labels (or being re-saved empty by the plugin). (#93, #95)
+- **Exports render everywhere now**: `.excalidraw` / `.excalidraw.md` files contain real WhiteboardRT Agent elements — shape and arrow labels as bound text, live arrow bindings — so they open correctly on excalidraw.com and in the Obsidian Excalidraw plugin instead of losing labels (or being re-saved empty by the plugin). (#93, #95)
 - **Byte-stable exports**: deterministic ids, seeds, and key order — re-exporting an unchanged scene is byte-identical, so committed diagrams and vault files never produce phantom git diffs, and Obsidian block references survive re-exports.
 - **Obsidian vault fixes**: Windows/CRLF `.excalidraw.md` files import correctly (#94, thanks @cason-miles); `## Text Elements` block references now cover shape labels too.
 - **Element fields are never silently dropped**: unknown scene properties (`containerId`, `textAlign`, `originalText`, ...) pass through the server intact — fixes browser-edited text vanishing after sync. (#92, thanks @junuxyz)
@@ -110,10 +110,10 @@ Current package version: **2.1.2**. The current release line is **v2.1 — Headl
 
 ### v1.1 — CLI-First
 
-- **First-class CLI**: every capability is now a composable command — `npx -y whiteboardai-server add|query|describe|screenshot|export|import|mermaid|snapshot|arrange|share|...` — JSON on stdout, meaningful exit codes. Also installed as the `whiteboardai-canvas` alias.
-- **Zero-setup**: canvas-driving CLI commands and the MCP server **auto-start the canvas server** if it isn't running (closes #66). Opt out with `WHITEBOARDAI_NO_AUTOSTART=1`.
+- **First-class CLI**: every capability is now a composable command — `npx -y whiteboardrt-agent-server add|query|describe|screenshot|export|import|mermaid|snapshot|arrange|share|...` — JSON on stdout, meaningful exit codes. Also installed as the `whiteboardrt-agent-canvas` alias.
+- **Zero-setup**: canvas-driving CLI commands and the MCP server **auto-start the canvas server** if it isn't running (closes #66). Opt out with `WHITEBOARD_RT_AGENT_NO_AUTOSTART=1`.
 - **`apply`**: multi-op patches (`{"create":[...],"update":[{"id":"a","set":{...}}],"delete":[...]}`) in a single invocation.
-- **`install-skill`**: `npx -y whiteboardai-server install-skill --dir <skills-root>` copies the portable agent skill into the directory your agent chooses (project or global), cleanly replacing older versions.
+- **`install-skill`**: `npx -y whiteboardrt-agent-server install-skill --dir <skills-root>` copies the portable agent skill into the directory your agent chooses (project or global), cleanly replacing older versions.
 - **Skill is now CLI-first** and no longer needs a cloned repo or configured MCP server to work.
 - **Typed queries**: `query --filter locked=true --filter label.text=API` — booleans, numbers, and nested keys work.
 - **Internals**: shared core library (`src/core/`) behind both the CLI and MCP server; canvas `groupIds` are the source of truth for grouping (ungroup now works across restarts); `node-fetch` dropped; MCP version metadata derived from `package.json`; canvas server writes a pidfile and shuts down cleanly.
@@ -127,12 +127,12 @@ The only prerequisite is **Node.js ≥ 20**.
 Copy this into your coding agent — it installs the portable skill into the project/global skill directory that agent already knows how to use, then verifies it by drawing a test diagram:
 
 ```text
-Install the WhiteboardAI canvas toolkit so you can draw diagrams for me:
+Install the WhiteboardRT Agent canvas toolkit so you can draw diagrams for me:
 
 1. Choose the right skill directory for this agent and scope (project or global).
-2. Run: npx -y whiteboardai-server install-skill --dir <that-skills-directory>
-3. Read the installed whiteboardai-skill/SKILL.md so you know the drawing workflow.
-4. Start the canvas with: npx -y whiteboardai-server start
+2. Run: npx -y whiteboardrt-agent-server install-skill --dir <that-skills-directory>
+3. Read the installed whiteboardrt-agent-skill/SKILL.md so you know the drawing workflow.
+4. Start the canvas with: npx -y whiteboardrt-agent-server start
    then tell me I can open http://127.0.0.1:3000 to watch you draw (optional).
 5. Draw a small test diagram — two labeled boxes connected by an arrow — take a
    screenshot, and show me the result to confirm everything works.
@@ -142,11 +142,11 @@ Install the WhiteboardAI canvas toolkit so you can draw diagrams for me:
 
 | You are... | Install with | Then |
 |---|---|---|
-| **Modern coding agent** | `npx -y whiteboardai-server install-skill --dir <skills-root>` | Let the agent choose project/global scope and its skill root |
-| **Claude Code shortcut** | `npx -y whiteboardai-server install-skill` | Installs to `~/.claude/skills` for backward compatibility |
-| **Codex shortcut** | `npx -y whiteboardai-server install-skill --target codex` | Installs to `~/.codex/skills` for backward compatibility |
+| **Modern coding agent** | `npx -y whiteboardrt-agent-server install-skill --dir <skills-root>` | Let the agent choose project/global scope and its skill root |
+| **Claude Code shortcut** | `npx -y whiteboardrt-agent-server install-skill` | Installs to `~/.claude/skills` for backward compatibility |
+| **Codex shortcut** | `npx -y whiteboardrt-agent-server install-skill --target codex` | Installs to `~/.codex/skills` for backward compatibility |
 | **MCP client user** (Claude Desktop, Cursor, ...) | Add the npx config below | See [Configure MCP Clients](#configure-mcp-clients) |
-| **CLI user / scripting** | Nothing — `npx -y whiteboardai-server <command>` | See [CLI Reference](#cli-reference) |
+| **CLI user / scripting** | Nothing — `npx -y whiteboardrt-agent-server <command>` | See [CLI Reference](#cli-reference) |
 | **Contributor / from source** | `git clone` + `npm ci` + `npm run build` | See [Quick Start (From Source / Docker)](#quick-start-from-source--docker) |
 
 There is no separate server setup: any drawing command auto-starts the local canvas server on `http://127.0.0.1:3000`.
@@ -157,7 +157,7 @@ No clone, no config:
 
 ```bash
 # start the canvas (drawing commands auto-start it too) and open it
-npx -y whiteboardai-server start
+npx -y whiteboardrt-agent-server start
 open http://127.0.0.1:3000   # optional: watch live (only mermaid needs the tab)
 
 # draw something
@@ -165,38 +165,38 @@ echo '[
   {"id":"api","type":"rectangle","x":100,"y":100,"width":160,"height":80,"text":"API Server","backgroundColor":"#a5d8ff"},
   {"id":"db","type":"rectangle","x":400,"y":100,"width":160,"height":80,"text":"Database","backgroundColor":"#99e9f2"},
   {"type":"arrow","x":0,"y":0,"startElementId":"api","endElementId":"db","text":"SQL"}
-]' | npx -y whiteboardai-server add
+]' | npx -y whiteboardrt-agent-server add
 
 # let your agent see its work
-npx -y whiteboardai-server describe
-npx -y whiteboardai-server screenshot --out diagram.png
+npx -y whiteboardrt-agent-server describe
+npx -y whiteboardrt-agent-server screenshot --out diagram.png
 
 # diagrams as repo artifacts
 mkdir -p docs
-npx -y whiteboardai-server export --out docs/architecture.excalidraw
+npx -y whiteboardrt-agent-server export --out docs/architecture.excalidraw
 
 # or straight into an Obsidian vault (.md extension → Obsidian Excalidraw plugin format)
-npx -y whiteboardai-server export --out ~/vault/diagrams/architecture.excalidraw.md
+npx -y whiteboardrt-agent-server export --out ~/vault/diagrams/architecture.excalidraw.md
 ```
 
 Give your agent the full playbook:
 
 ```bash
-npx -y whiteboardai-server install-skill --dir <skills-root>
-npx -y whiteboardai-server install-skill --print-source  # inspect bundled source path
+npx -y whiteboardrt-agent-server install-skill --dir <skills-root>
+npx -y whiteboardrt-agent-server install-skill --print-source  # inspect bundled source path
 ```
 
 > **Security note:** The canvas server binds `127.0.0.1` only by default. If you expose it on a network interface (`HOST=0.0.0.0`), put network-level access controls in front — the API has no built-in authentication.
 
 ## Agent Skill
 
-The skill at `skills/whiteboardai-skill/` teaches agents the full workflow — layout planning, the screenshot-verify-fix quality loop, arrow routing, anti-patterns, snapshots, and file I/O. It works through the CLI (preferred, zero setup), MCP tools (if configured), or raw REST — in that order.
+The skill at `skills/whiteboardrt-agent-skill/` teaches agents the full workflow — layout planning, the screenshot-verify-fix quality loop, arrow routing, anti-patterns, snapshots, and file I/O. It works through the CLI (preferred, zero setup), MCP tools (if configured), or raw REST — in that order.
 
 ```bash
-npx -y whiteboardai-server install-skill --dir <skills-root>
+npx -y whiteboardrt-agent-server install-skill --dir <skills-root>
 ```
 
-The command copies the bundled `whiteboardai-skill/` directory into `<skills-root>/whiteboardai-skill`. Let your agent choose whether that root should be project-level or global. Re-running `install-skill` upgrades in place — it replaces the target directory, so files removed upstream don't linger.
+The command copies the bundled `whiteboardrt-agent-skill/` directory into `<skills-root>/whiteboardrt-agent-skill`. Let your agent choose whether that root should be project-level or global. Re-running `install-skill` upgrades in place — it replaces the target directory, so files removed upstream don't linger.
 
 Where the skill shines:
 
@@ -207,9 +207,9 @@ Where the skill shines:
 
 ## CLI Reference
 
-`npx -y whiteboardai-server <command>` or (after `npm i -g whiteboardai-server`) `whiteboardai-canvas <command>`.
+`npx -y whiteboardrt-agent-server <command>` or (after `npm i -g whiteboardrt-agent-server`) `whiteboardrt-agent-canvas <command>`.
 
-Conventions: JSON results on stdout — except `describe` (plain text by design) and raw-content output when `--out` is omitted (`export` prints the scene JSON, `screenshot --format svg` prints SVG). Diagnostics on stderr. Exit codes: `0` ok, `1` error, `2` usage, `3` canvas unreachable, `4` browser tab required (only `mermaid` and `screenshot --renderer browser`). Canvas URL from `EXPRESS_SERVER_URL` or `--url`. Canvas-driving commands auto-start the server; `status` only reports current state. Explicit `start` overrides the `WHITEBOARDAI_NO_AUTOSTART=1` opt-out (it's user intent, not auto-start).
+Conventions: JSON results on stdout — except `describe` (plain text by design) and raw-content output when `--out` is omitted (`export` prints the scene JSON, `screenshot --format svg` prints SVG). Diagnostics on stderr. Exit codes: `0` ok, `1` error, `2` usage, `3` canvas unreachable, `4` browser tab required (only `mermaid` and `screenshot --renderer browser`). Canvas URL from `EXPRESS_SERVER_URL` or `--url`. Canvas-driving commands auto-start the server; `status` only reports current state. Explicit `start` overrides the `WHITEBOARD_RT_AGENT_NO_AUTOSTART=1` opt-out (it's user intent, not auto-start).
 
 | Command | Description |
 |---------|-------------|
@@ -234,10 +234,10 @@ Labels and arrow bindings use the agent-friendly format everywhere in the CLI: `
 
 ## Headless Rendering
 
-Since v2.1, `screenshot`, `export_to_image` and `get_canvas_screenshot` render without a browser. Inside the canvas server, the scene is prepared with the canvas tab's own code (label sizing, wrapping and centering, defaults) and the canvas `exportToSvg` draws it under Node (a small jsdom shim supplies the DOM it expects, and text is measured with the bundled fonts' real glyph widths); [resvg](https://github.com/thx/resvg-js) rasterizes the SVG to PNG. The output is what the WhiteboardAI canvas draws — same SVG structure as a browser export, text within half a pixel — and it is deterministic: an unchanged scene renders to byte-identical SVG and PNG, so committed images stay diff-clean.
+Since v2.1, `screenshot`, `export_to_image` and `get_canvas_screenshot` render without a browser. Inside the canvas server, the scene is prepared with the canvas tab's own code (label sizing, wrapping and centering, defaults) and the canvas `exportToSvg` draws it under Node (a small jsdom shim supplies the DOM it expects, and text is measured with the bundled fonts' real glyph widths); [resvg](https://github.com/thx/resvg-js) rasterizes the SVG to PNG. The output is what the WhiteboardRT Agent canvas draws — same SVG structure as a browser export, text within half a pixel — and it is deterministic: an unchanged scene renders to byte-identical SVG and PNG, so committed images stay diff-clean.
 
 - **Fonts**: Excalifont, Virgil, Cascadia Code and Liberation Sans ship as TTFs in `assets/fonts` (all SIL OFL 1.1; see `assets/fonts/LICENSES.md`). SVGs embed the faces they use, so they look right in browsers, GitHub and editors. Nunito, Lilita One and Comic Shanns render with the closest bundled face for now. Text in other scripts (CJK, emoji) falls back to the machine's fonts, with a warning.
-- **Options** (CLI flags / REST body / MCP params): `background`, `dark`, `scale` 1–4 (PNG), `padding`, `elementIds` or `frameId` to render a subset, `embedFonts`, `embedScene` (PNG only, default false). `WHITEBOARDAI_RENDER_MAX_DIM` (default 8192) caps the PNG's largest side.
+- **Options** (CLI flags / REST body / MCP params): `background`, `dark`, `scale` 1–4 (PNG), `padding`, `elementIds` or `frameId` to render a subset, `embedFonts`, `embedScene` (PNG only, default false). `WHITEBOARD_RT_AGENT_RENDER_MAX_DIM` (default 8192) caps the PNG's largest side.
 - **`--renderer browser`** asks an open canvas tab to render instead (the pre-2.1 path). Useful for a second opinion; it is slower and the tab's unsynced edits are discarded first.
 - **Offline**: `render docs/arch.excalidraw --out docs/arch.png` needs no canvas server at all — a natural fit for CI jobs that keep images next to committed diagrams.
 - **Still browser-bound**: Mermaid conversion (`mermaid`, `create_from_mermaid`) and `set_viewport`.
@@ -253,27 +253,27 @@ The MCP server runs over stdio by default (streamable HTTP is also available —
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `EXPRESS_SERVER_URL` | URL of the canvas server (used for API calls and auto-start) | `http://127.0.0.1:3000` |
-| `WHITEBOARDAI_PUBLIC_URL` | Public URL of the canvas UI used in user-facing hints; display-only | `EXPRESS_SERVER_URL` |
+| `WHITEBOARD_RT_AGENT_PUBLIC_URL` | Public URL of the canvas UI used in user-facing hints; display-only | `EXPRESS_SERVER_URL` |
 | `ENABLE_CANVAS_SYNC` | Enable real-time canvas sync | `true` |
 | `MCP_TRANSPORT` | MCP transport: `stdio` or `http` | `stdio` |
 | `MCP_HOST` | Bind address when `MCP_TRANSPORT=http` | `0.0.0.0` |
 | `MCP_PORT` | Port when `MCP_TRANSPORT=http` | `3100` |
 | `DISABLED_TOOLS` | Comma-separated MCP tool names to hide from `tools/list` and `server/discover` | (unset; all tools) |
-| `WHITEBOARDAI_NO_AUTOSTART` | Set `1` to disable canvas auto-start (`EXCALIDRAW_NO_AUTOSTART` fallback) | (unset) |
-| `WHITEBOARDAI_EXPORT_DIR` | Base directory MCP file exports may write to (`EXCALIDRAW_EXPORT_DIR` fallback) | current working dir |
-| `WHITEBOARDAI_RENDER_MAX_DIM` | Largest side of a headless PNG, in pixels (`EXCALIDRAW_RENDER_MAX_DIM` fallback) | `8192` |
-| `WHITEBOARDAI_DATA_DIR` | Optional local durable-state directory (`EXCALIDRAW_DATA_DIR` fallback) | (unset; in-memory) |
-| `WHITEBOARDAI_STORAGE_URL` | Shared storage backend URL for remote durable state | (unset; local/in-memory) |
-| `WHITEBOARDAI_PERSISTENCE` | Set `remote` to enable remote state using the existing storage URL fallbacks | (unset) |
-| `WHITEBOARDAI_STORAGE_STATE_KEY` | Storage key for the canvas checkpoint | `whiteboardai-canvas-state-v1` |
-| `WHITEBOARDAI_STORAGE_FILE_PREFIX` | Prefix for stored image blobs | `whiteboardai-file-` |
-| `WHITEBOARDAI_SHARE_UPLOAD_URL` | Where `share` uploads the encrypted scene (an excalidraw-json `POST` endpoint) | (unset; sharing disabled) |
-| `WHITEBOARDAI_SHARE_BASE_URL` | Base URL that share links open in | (unset; sharing disabled) |
+| `WHITEBOARD_RT_AGENT_NO_AUTOSTART` | Set `1` to disable canvas auto-start | (unset) |
+| `WHITEBOARD_RT_AGENT_EXPORT_DIR` | Base directory MCP file exports may write to | current working dir |
+| `WHITEBOARD_RT_AGENT_RENDER_MAX_DIM` | Largest side of a headless PNG, in pixels | `8192` |
+| `WHITEBOARD_RT_AGENT_DATA_DIR` | Optional local durable-state directory | (unset; in-memory) |
+| `WHITEBOARD_RT_AGENT_STORAGE_URL` | Shared storage backend URL for remote durable state | (unset; local/in-memory) |
+| `WHITEBOARD_RT_AGENT_PERSISTENCE` | Set `remote` to enable remote state (requires `WHITEBOARD_RT_AGENT_STORAGE_URL`) | (unset) |
+| `WHITEBOARD_RT_AGENT_STORAGE_STATE_KEY` | Storage key for the canvas checkpoint | `whiteboardrt-agent-canvas-state-v1` |
+| `WHITEBOARD_RT_AGENT_STORAGE_FILE_PREFIX` | Prefix for stored image blobs | `whiteboardrt-agent-file-` |
+| `WHITEBOARD_RT_AGENT_SHARE_UPLOAD_URL` | Where `share` uploads the encrypted scene (an excalidraw-json `POST` endpoint) | (unset; sharing disabled) |
+| `WHITEBOARD_RT_AGENT_SHARE_BASE_URL` | Base URL that share links open in | (unset; sharing disabled) |
 | `PORT` / `HOST` | Canvas server bind address | `3000` / `127.0.0.1` |
 | `LOG_LEVEL` | Log verbosity (`error`, `warn`, `info`, `debug`) | `info` |
-| `LOG_FILE_PATH` | Log file location | `~/Library/Logs/whiteboardai.log` (macOS), `$XDG_STATE_HOME/whiteboardai/whiteboardai.log` (Linux), `%LOCALAPPDATA%\WhiteboardAI\whiteboardai.log` (Windows) |
+| `LOG_FILE_PATH` | Log file location | `~/Library/Logs/whiteboardrt-agent.log` (macOS), `$XDG_STATE_HOME/whiteboardrt-agent/whiteboardrt-agent.log` (Linux), `%LOCALAPPDATA%\WhiteboardRT-Agent\whiteboardrt-agent.log` (Windows) |
 
-`WHITEBOARDAI_PUBLIC_URL` (`EXCALIDRAW_PUBLIC_URL` fallback) only changes the URL shown in human-facing hints (for example, the Mermaid conversion note). API calls and auto-start always use `EXPRESS_SERVER_URL`, so behind a reverse proxy set `EXPRESS_SERVER_URL` to the internal address and `WHITEBOARDAI_PUBLIC_URL` to the public HTTPS URL.
+`WHITEBOARD_RT_AGENT_PUBLIC_URL` (`EXPRESS_SERVER_URL` fallback) only changes the URL shown in human-facing hints (for example, the Mermaid conversion note). API calls and auto-start always use `EXPRESS_SERVER_URL`, so behind a reverse proxy set `EXPRESS_SERVER_URL` to the internal address and `WHITEBOARD_RT_AGENT_PUBLIC_URL` to the public HTTPS URL.
 
 #### HTTP transport
 
@@ -292,19 +292,19 @@ The server listens on `http://0.0.0.0:3100` (override with `MCP_HOST` / `MCP_POR
 Docker:
 
 ```bash
-docker run -p 3100:3100 -e MCP_TRANSPORT=http ghcr.io/homeserverhq/whiteboardai-mcp:latest
+docker run -p 3100:3100 -e MCP_TRANSPORT=http ghcr.io/homeserverhq/whiteboardrt-agent-mcp:latest
 ```
 
 In HTTP mode, `info`/`debug` logs are written to stderr (visible in `docker logs`); in stdio mode stdout is reserved for JSON-RPC, so only `warn`/`error` reach stderr and everything else goes to the log file.
 
 #### Durable canvas state
 
-For the shared single-instance canvas, remote persistence can use the same storage backend as the WhiteboardRT web container instead of a local data directory. Set `WHITEBOARDAI_STORAGE_URL` (for example `http://excalidraw-storage:8080/api/v2`) or set `WHITEBOARDAI_PERSISTENCE=remote` to use the existing `VITE_APP_INTERNAL_STORAGE_URL` / `HTTP_STORAGE_BACKEND_URL` fallback. Remote mode stores the canvas checkpoint in the storage backend and image blobs alongside it; `WHITEBOARDAI_DATA_DIR` remains available for standalone/local deployments.
+For the shared single-instance canvas, remote persistence can use the same storage backend as the WhiteboardRT web container instead of a local data directory. Set `WHITEBOARD_RT_AGENT_STORAGE_URL` (for example `http://excalidraw-storage:8080/api/v2`) and, optionally, `WHITEBOARD_RT_AGENT_PERSISTENCE=remote`. Remote mode stores the canvas checkpoint in the storage backend and image blobs alongside it; `WHITEBOARD_RT_AGENT_DATA_DIR` remains available for standalone/local deployments.
 
-Set `WHITEBOARDAI_DATA_DIR` to recover elements, server-known image files, and named snapshots after a canvas-server restart. From a source checkout after `npm run build`:
+Set `WHITEBOARD_RT_AGENT_DATA_DIR` to recover elements, server-known image files, and named snapshots after a canvas-server restart. From a source checkout after `npm run build`:
 
 ```bash
-WHITEBOARDAI_DATA_DIR=/absolute/private/canvas-data \
+WHITEBOARD_RT_AGENT_DATA_DIR=/absolute/private/canvas-data \
   node dist/bin.js start
 ```
 
@@ -333,7 +333,7 @@ Config location:
   "mcpServers": {
     "excalidraw": {
       "command": "npx",
-      "args": ["-y", "whiteboardai-server"]
+      "args": ["-y", "whiteboardrt-agent-server"]
     }
   }
 }
@@ -365,7 +365,7 @@ Config location:
         "run", "-i", "--rm",
         "-e", "EXPRESS_SERVER_URL=http://host.docker.internal:3000",
         "-e", "ENABLE_CANVAS_SYNC=true",
-        "ghcr.io/homeserverhq/whiteboardai-mcp:latest"
+        "ghcr.io/homeserverhq/whiteboardrt-agent-mcp:latest"
       ]
     }
   }
@@ -378,14 +378,14 @@ Config location:
 
 **npx (recommended)**
 ```bash
-claude mcp add whiteboardai --scope user -- npx -y whiteboardai-server
+claude mcp add whiteboardrt-agent --scope user -- npx -y whiteboardrt-agent-server
 ```
 
-> Tip: for coding agents, the skill + CLI often beats MCP config entirely — let the agent pick its skill root, then run `npx -y whiteboardai-server install-skill --dir <skills-root>`.
+> Tip: for coding agents, the skill + CLI often beats MCP config entirely — let the agent pick its skill root, then run `npx -y whiteboardrt-agent-server install-skill --dir <skills-root>`.
 
 **Local (node)** - User-level (available across all projects):
 ```bash
-claude mcp add whiteboardai --scope user \
+claude mcp add whiteboardrt-agent --scope user \
   -e EXPRESS_SERVER_URL=http://127.0.0.1:3000 \
   -e ENABLE_CANVAS_SYNC=true \
   -- node /absolute/path/to/excalidraw-ai/dist/index.js
@@ -393,11 +393,11 @@ claude mcp add whiteboardai --scope user \
 
 **Docker**
 ```bash
-claude mcp add whiteboardai --scope user \
+claude mcp add whiteboardrt-agent --scope user \
   -- docker run -i --rm \
   -e EXPRESS_SERVER_URL=http://host.docker.internal:3000 \
   -e ENABLE_CANVAS_SYNC=true \
-  ghcr.io/homeserverhq/whiteboardai-mcp:latest
+  ghcr.io/homeserverhq/whiteboardrt-agent-mcp:latest
 ```
 
 **Manage servers:**
@@ -418,7 +418,7 @@ Config location: `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json
   "mcpServers": {
     "excalidraw": {
       "command": "npx",
-      "args": ["-y", "whiteboardai-server"]
+      "args": ["-y", "whiteboardrt-agent-server"]
     }
   }
 }
@@ -434,7 +434,7 @@ Config location: `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json
         "run", "-i", "--rm",
         "-e", "EXPRESS_SERVER_URL=http://host.docker.internal:3000",
         "-e", "ENABLE_CANVAS_SYNC=true",
-        "ghcr.io/homeserverhq/whiteboardai-mcp:latest"
+        "ghcr.io/homeserverhq/whiteboardrt-agent-mcp:latest"
       ]
     }
   }
@@ -447,7 +447,7 @@ Config location: `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json
 
 **npx (recommended)**
 ```bash
-codex mcp add whiteboardai -- npx -y whiteboardai-server
+codex mcp add whiteboardrt-agent -- npx -y whiteboardrt-agent-server
 ```
 
 **Docker**
@@ -456,7 +456,7 @@ codex mcp add excalidraw \
   -- docker run -i --rm \
   -e EXPRESS_SERVER_URL=http://host.docker.internal:3000 \
   -e ENABLE_CANVAS_SYNC=true \
-  ghcr.io/homeserverhq/whiteboardai-mcp:latest
+  ghcr.io/homeserverhq/whiteboardrt-agent-mcp:latest
 ```
 
 **Manage servers:**
@@ -477,7 +477,7 @@ Config location: `~/.config/opencode/opencode.json` or project-level `opencode.j
   "mcp": {
     "excalidraw": {
       "type": "local",
-      "command": ["npx", "-y", "whiteboardai-server"],
+      "command": ["npx", "-y", "whiteboardrt-agent-server"],
       "enabled": true
     }
   }
@@ -495,7 +495,7 @@ Config location: `~/.gemini/antigravity/mcp_config.json`
   "mcpServers": {
     "excalidraw": {
       "command": "npx",
-      "args": ["-y", "whiteboardai-server"]
+      "args": ["-y", "whiteboardrt-agent-server"]
     }
   }
 }
@@ -505,23 +505,23 @@ Config location: `~/.gemini/antigravity/mcp_config.json`
 
 ### Notes
 
-- **Docker networking**: Use `host.docker.internal` to reach the canvas server running on your host machine. On Linux, you may need `--add-host=host.docker.internal:host-gateway` or use `172.17.0.1`. The Docker MCP image sets `WHITEBOARDAI_NO_AUTOSTART=1` (it has no frontend build) — run the canvas as its own container.
-- **Canvas persistence**: By default, elements and named snapshots are held in memory and are lost on server restart. Set `WHITEBOARDAI_DATA_DIR` for restart recovery of elements, server-known image files, and named snapshots (see [Durable canvas state](#durable-canvas-state)). Use `export` to save a standalone `.excalidraw` file; taking a snapshot alone does not provide restart recovery in the default in-memory mode.
+- **Docker networking**: Use `host.docker.internal` to reach the canvas server running on your host machine. On Linux, you may need `--add-host=host.docker.internal:host-gateway` or use `172.17.0.1`. The Docker MCP image sets `WHITEBOARD_RT_AGENT_NO_AUTOSTART=1` (it has no frontend build) — run the canvas as its own container.
+- **Canvas persistence**: By default, elements and named snapshots are held in memory and are lost on server restart. Set `WHITEBOARD_RT_AGENT_DATA_DIR` for restart recovery of elements, server-known image files, and named snapshots (see [Durable canvas state](#durable-canvas-state)). Use `export` to save a standalone `.excalidraw` file; taking a snapshot alone does not provide restart recovery in the default in-memory mode.
 
-## MCP Tools (27 Total)
+## MCP Tools (26 Total)
 
 | Category | Tools |
 |---|---|
 | **Element CRUD** | `create_element`, `get_element`, `update_element`, `delete_element`, `query_elements`, `batch_create_elements`, `duplicate_elements` |
 | **Layout** | `align_elements`, `distribute_elements`, `group_elements`, `ungroup_elements`, `lock_elements`, `unlock_elements` |
 | **Scene Awareness** | `describe_scene`, `get_canvas_screenshot` |
-| **File I/O** | `export_scene`, `import_scene`, `export_to_image`, `export_to_share_url` (legacy alias: `export_to_excalidraw_url`), `create_from_mermaid` |
+| **File I/O** | `export_scene`, `import_scene`, `export_to_image`, `export_to_share_url`, `create_from_mermaid` |
 | **State Management** | `clear_canvas`, `snapshot_scene`, `restore_snapshot` |
 | **Viewport** | `set_viewport` |
 | **Design Guide** | `read_diagram_guide` |
 | **Resources** | `get_resource` |
 
-Full schemas are discoverable via `tools/list` or in `skills/whiteboardai-skill/references/cheatsheet.md`.
+Full schemas are discoverable via `tools/list` or in `skills/whiteboardrt-agent-skill/references/cheatsheet.md`.
 
 To hide a tool from `tools/list` and `server/discover` (for example to avoid sending large image payloads to the model), set a comma-separated list of tool names:
 
@@ -556,20 +556,20 @@ node dist/bin.js status           # or drive the CLI straight from the build
 
 Docker canvas server:
 ```bash
-docker run -d -p 3000:3000 --name whiteboardai-canvas ghcr.io/homeserverhq/whiteboardai-canvas:latest
+docker run -d -p 3000:3000 --name whiteboardrt-agent-canvas ghcr.io/homeserverhq/whiteboardrt-agent-canvas:latest
 ```
 
-MCP server image: `ghcr.io/homeserverhq/whiteboardai-mcp:latest` (stdio by default; set `MCP_TRANSPORT=http` and publish port `3100` for HTTP, and point `EXPRESS_SERVER_URL` at the canvas container).
+MCP server image: `ghcr.io/homeserverhq/whiteboardrt-agent-mcp:latest` (stdio by default; set `MCP_TRANSPORT=http` and publish port `3100` for HTTP, and point `EXPRESS_SERVER_URL` at the canvas container).
 
 ## Testing
 
 ### CLI Smoke Test
 
 ```bash
-npx -y whiteboardai-server start
-npx -y whiteboardai-server status
-npx -y whiteboardai-server add --one '{"type":"rectangle","x":100,"y":100,"width":300,"height":200}'
-npx -y whiteboardai-server describe
+npx -y whiteboardrt-agent-server start
+npx -y whiteboardrt-agent-server status
+npx -y whiteboardrt-agent-server add --one '{"type":"rectangle","x":100,"y":100,"width":300,"height":200}'
+npx -y whiteboardrt-agent-server describe
 ```
 
 ### Canvas Smoke Test (HTTP)
@@ -665,7 +665,7 @@ No. Screenshots and PNG/SVG exports render headless inside the canvas server (se
 
 ### Are my diagrams persistent?
 
-By default the canvas is in-memory (restart = blank canvas). Set `WHITEBOARDAI_DATA_DIR` (`EXCALIDRAW_DATA_DIR` fallback) for automatic local restart recovery of elements, server-known image files, and named snapshots. Portable, reviewable artifacts should still be exported as `.excalidraw` files and committed to your repo when appropriate.
+By default the canvas is in-memory (restart = blank canvas). Set `WHITEBOARD_RT_AGENT_DATA_DIR` for automatic local restart recovery of elements, server-known image files, and named snapshots. Portable, reviewable artifacts should still be exported as `.excalidraw` files and committed to your repo when appropriate.
 
 ### Are share links private?
 
@@ -673,12 +673,12 @@ Sharing is disabled by default. When configured, `share` encrypts the scene loca
 
 ### Can share links point at a self-hosted service?
 
-Yes. Set `WHITEBOARDAI_SHARE_UPLOAD_URL` to your storage backend's scene endpoint and `WHITEBOARDAI_SHARE_BASE_URL` to the viewer base URL. Any backend that speaks the excalidraw-json API works, for example [alswl/excalidraw-storage-backend](https://github.com/alswl/excalidraw-storage-backend), whose endpoint is `<storage>/api/v2/scenes/`:
+Yes. Set `WHITEBOARD_RT_AGENT_SHARE_UPLOAD_URL` to your storage backend's scene endpoint and `WHITEBOARD_RT_AGENT_SHARE_BASE_URL` to the viewer base URL. Any backend that speaks the excalidraw-json API works, for example [alswl/excalidraw-storage-backend](https://github.com/alswl/excalidraw-storage-backend), whose endpoint is `<storage>/api/v2/scenes/`:
 
 ```bash
-WHITEBOARDAI_SHARE_UPLOAD_URL=https://draw.example.com/api/v2/scenes/ \
-WHITEBOARDAI_SHARE_BASE_URL=https://draw.example.com \
-  npx -y whiteboardai-server share
+WHITEBOARD_RT_AGENT_SHARE_UPLOAD_URL=https://draw.example.com/api/v2/scenes/ \
+WHITEBOARD_RT_AGENT_SHARE_BASE_URL=https://draw.example.com \
+  npx -y whiteboardrt-agent-server share
 ```
 
 Your app must load `#json=` links from that same backend (for the alswl fork: `VITE_APP_BACKEND_V2_GET_URL`).
@@ -689,11 +689,11 @@ No API key is required. Core drawing runs locally under MIT license. The canvas 
 
 ### Can I use it without configuring MCP?
 
-Yes — that's the recommended path for coding agents: `npx -y whiteboardai-server install-skill --dir <skills-root>` and the agent drives everything through the CLI. MCP configuration is only needed for chat clients like Claude Desktop.
+Yes — that's the recommended path for coding agents: `npx -y whiteboardrt-agent-server install-skill --dir <skills-root>` and the agent drives everything through the CLI. MCP configuration is only needed for chat clients like Claude Desktop.
 
 ## Troubleshooting
 
-- **CLI exit code 3** (canvas unreachable): the server is not running for an inspecting command such as `status`, auto-start is disabled (`WHITEBOARDAI_NO_AUTOSTART=1`), or `EXPRESS_SERVER_URL` points at a non-loopback host. Run `start` explicitly or fix the env.
+- **CLI exit code 3** (canvas unreachable): the server is not running for an inspecting command such as `status`, auto-start is disabled (`WHITEBOARD_RT_AGENT_NO_AUTOSTART=1`), or `EXPRESS_SERVER_URL` points at a non-loopback host. Run `start` explicitly or fix the env.
 - **CLI exit code 4** (browser required): only `mermaid` and `screenshot --renderer browser` need an open tab — open `http://127.0.0.1:3000` in a browser and retry, or drop `--renderer browser` to render headless.
 - **Headless PNG shows boxes instead of CJK/emoji text**: the bundled fonts cover Latin scripts; for other scripts resvg falls back to the machine's fonts (a warning is printed). Install a CJK font on the machine running the canvas server.
 - **Canvas not updating**: confirm `EXPRESS_SERVER_URL` points at the running canvas server (`status` shows the URL in use).
@@ -702,7 +702,7 @@ Yes — that's the recommended path for coding agents: `npx -y whiteboardai-serv
 
 ## Known Issues / TODO
 
-- [x] **Optional persistent storage**: set `WHITEBOARDAI_DATA_DIR` for atomic local restart recovery; the default remains in-memory.
+- [x] **Optional persistent storage**: set `WHITEBOARD_RT_AGENT_DATA_DIR` for atomic local restart recovery; the default remains in-memory.
 - [ ] **Mermaid conversion requires a browser**: `mermaid` / `create_from_mermaid` lay out the diagram in the frontend. Image export and screenshots are headless since v2.1.
 - [ ] **Canvas page fonts come from a CDN**: serving them from the canvas server would make the page work fully offline.
 
@@ -714,13 +714,13 @@ Contributions welcome!
 npm run type-check
 npm run build
 npm run cli -- status      # run the CLI from the local build
-npm run sync:skills        # after editing skills/whiteboardai-skill, sync the repo-local agent copy
+npm run sync:skills        # after editing skills/whiteboardrt-agent-skill, sync the repo-local agent copy
 ```
 
 Bug reports and pull requests are welcome on [GitHub issues](https://github.com/homeserverhq/excalidraw-ai/issues). If this project helps you, a ⭐ helps others find it.
 
 ## License
 
-[MIT](LICENSE) © WhiteboardAI contributors — not affiliated with the Excalidraw team. [Excalidraw](https://github.com/excalidraw/excalidraw) is its own MIT-licensed project; this toolkit builds on it with love.
+[MIT](LICENSE) © WhiteboardRT Agent contributors — not affiliated with the Excalidraw team. [Excalidraw](https://github.com/excalidraw/excalidraw) is its own MIT-licensed project; this toolkit builds on it with love.
 
-**Links:** [npm package](https://www.npmjs.com/package/whiteboardai-server) · [GitHub](https://github.com/homeserverhq/excalidraw-ai) · [Issues](https://github.com/homeserverhq/excalidraw-ai/issues)
+**Links:** [npm package](https://www.npmjs.com/package/whiteboardrt-agent-server) · [GitHub](https://github.com/homeserverhq/excalidraw-ai) · [Issues](https://github.com/homeserverhq/excalidraw-ai/issues)

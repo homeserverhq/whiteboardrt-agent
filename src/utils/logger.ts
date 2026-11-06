@@ -12,15 +12,15 @@ import { homedir, tmpdir } from 'os';
  */
 function defaultLogPath(): string {
   if (process.platform === 'darwin') {
-    return path.join(homedir(), 'Library', 'Logs', 'whiteboardai.log');
+    return path.join(homedir(), 'Library', 'Logs', 'whiteboardrt-agent.log');
   }
   if (process.platform === 'win32') {
     const base = process.env.LOCALAPPDATA || path.join(homedir(), 'AppData', 'Local');
-    return path.join(base, 'WhiteboardAI', 'whiteboardai.log');
+    return path.join(base, 'WhiteboardRT-Agent', 'whiteboardrt-agent.log');
   }
   // Linux and other POSIX platforms: follow the XDG state convention.
   const xdgState = process.env.XDG_STATE_HOME || path.join(homedir(), '.local', 'state');
-  return path.join(xdgState, 'whiteboardai', 'whiteboardai.log');
+  return path.join(xdgState, 'whiteboardrt-agent', 'whiteboardrt-agent.log');
 }
 
 const LOG_FILE_PATH = process.env.LOG_FILE_PATH || defaultLogPath();
@@ -41,7 +41,7 @@ function resolveLogFilePath(): string {
     }
   }
 
-  return ensureWritableLogFile(path.join(tmpdir(), 'whiteboardai.log'));
+  return ensureWritableLogFile(path.join(tmpdir(), 'whiteboardrt-agent.log'));
 }
 
 const RESOLVED_LOG_FILE_PATH = resolveLogFilePath();

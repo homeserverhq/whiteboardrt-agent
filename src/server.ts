@@ -43,6 +43,8 @@ import {
   remoteStorageEnabled,
 } from './core/canvas-persistence.js';
 
+import { AGENT_PERSISTENCE_REQUESTED } from './core/config.js';
+
 function mutationErrorStatus(error: unknown, fallback: number): number {
   if (error instanceof CanvasPersistenceError) return 500;
   if (error instanceof CanvasFileImmutabilityError ||
@@ -1460,8 +1462,7 @@ app.get('/health', (req: Request, res: Response) => {
     // Identity for `stop`: it must only ever signal a process that both
     // identifies as this service AND self-reports its pid — never a pid
     // from a stale pidfile or an unrelated app squatting on the port.
-    service: 'whiteboardai-canvas',
-    legacy_service: 'mcp-excalidraw-canvas',
+    service: 'whiteboardrt-agent-canvas',
     pid: process.pid
   });
 });
@@ -1555,6 +1556,12 @@ server.on('error', (error: NodeJS.ErrnoException) => {
 });
 
 async function startServer(): Promise<void> {
+  if (AGENT_PERSISTENCE_REQUESTED && !remoteStorageEnabled()) {
+    logger.warn(
+      'WHITEBOARD_RT_AGENT_PERSISTENCE=remote requires WHITEBOARD_RT_AGENT_STORAGE_URL; starting without remote persistence',
+    );
+  }
+
   acquireDurableStateLock();
   let durableState: Awaited<ReturnType<typeof loadDurableState>>;
   try {
@@ -1593,11 +1600,11 @@ async function startServer(): Promise<void> {
 
   server.listen(PORT, HOST, () => {
     const hostForUrl = formatHostForUrl(HOST);
-    logger.info(`WhiteboardAI canvas server running on http://${hostForUrl}:${PORT}`);
+    logger.info(`WhiteboardRT Agent canvas server running on http://${hostForUrl}:${PORT}`);
     logger.info(`WebSocket server running on ws://${hostForUrl}:${PORT}`);
 
     // Written only after listen succeeds so stale files can't shadow a
-    // server that never came up; lets `whiteboardai-canvas stop` find us.
+    // server that never came up; lets `whiteboardrt-agent-canvas stop` find us.
     writePidFile(PORT, process.pid);
     ownsPidFile = true;
   });

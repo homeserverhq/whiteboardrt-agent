@@ -1,4 +1,4 @@
-const HIDDEN_CLASS = "whiteboardai-hidden";
+const HIDDEN_CLASS = "whiteboardrt-agent-hidden";
 
 const hideBrandedMenuEntries = () => {
   document.querySelectorAll(".dropdown-menu-item__text").forEach((element) => {

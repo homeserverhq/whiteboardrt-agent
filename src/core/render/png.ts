@@ -77,10 +77,7 @@ export function svgToPng(svg: string, options: PngOptions): PngResult {
 // worker surfaces as an ordinary Error here; the server keeps running.
 const PNG_WORKER_PATH = fileURLToPath(new URL('./png-worker.js', import.meta.url));
 const PNG_WORKER_TIMEOUT_MS =
-  Number(
-    process.env.WHITEBOARDAI_PNG_WORKER_TIMEOUT_MS ??
-      process.env.EXCALIDRAW_PNG_WORKER_TIMEOUT_MS
-  ) || 120_000;
+  Number(process.env.WHITEBOARD_RT_AGENT_PNG_WORKER_TIMEOUT_MS) || 120_000;
 
 export async function svgToPngIsolated(svg: string, options: PngOptions): Promise<PngResult> {
   return new Promise<PngResult>((resolve, reject) => {

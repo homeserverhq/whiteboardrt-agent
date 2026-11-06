@@ -7,8 +7,8 @@ process.env.NO_COLOR = '1';
 import { serveStdio } from '@modelcontextprotocol/server/stdio';
 import logger from './utils/logger.js';
 import { isMainModule } from './core/entry.js';
-import { ENABLE_CANVAS_SYNC, EXCALIDRAW_NO_AUTOSTART, MCP_TRANSPORT } from './core/config.js';
-import { whiteboardAiMcpServerFactory } from './core/mcp-server.js';
+import { ENABLE_CANVAS_SYNC, AGENT_NO_AUTOSTART, MCP_TRANSPORT } from './core/config.js';
+import { whiteboardRtAgentMcpServerFactory } from './core/mcp-server.js';
 import { ensureCanvasReadyForMcpTool } from './core/canvas-state.js';
 
 export interface ServerHandle {
@@ -19,7 +19,7 @@ export interface ServerHandle {
 // fast. Canvas-backed tools await the same promise before touching HTTP, which
 // avoids a first-tool race.
 function startCanvasAutoStart(): void {
-  if (ENABLE_CANVAS_SYNC && !EXCALIDRAW_NO_AUTOSTART) {
+  if (ENABLE_CANVAS_SYNC && !AGENT_NO_AUTOSTART) {
     void ensureCanvasReadyForMcpTool().catch(error => {
       logger.warn('Canvas auto-start failed:', (error as Error).message);
     });
@@ -29,7 +29,7 @@ function startCanvasAutoStart(): void {
 // Start server
 async function runServer(): Promise<ServerHandle> {
   try {
-    logger.info(`Starting WhiteboardAI MCP server (transport: ${MCP_TRANSPORT})...`);
+    logger.info(`Starting WhiteboardRT Agent MCP server (transport: ${MCP_TRANSPORT})...`);
 
     if (MCP_TRANSPORT === 'http') {
       // Loaded lazily so stdio mode never pulls in the HTTP/Express graph.
@@ -43,13 +43,13 @@ async function runServer(): Promise<ServerHandle> {
     // request pins a 2025-era instance, while a `server/discover` probe — or
     // any request carrying the 2026-07-28 `_meta` envelope, including a
     // `tools/call` sent without any handshake at all — pins a modern one.
-    const handle = serveStdio(whiteboardAiMcpServerFactory, {
+    const handle = serveStdio(whiteboardRtAgentMcpServerFactory, {
       onerror: error => {
         logger.warn('MCP stdio connection error:', error.message);
       }
     });
 
-    logger.info('WhiteboardAI MCP server running on stdio');
+    logger.info('WhiteboardRT Agent MCP server running on stdio');
     startCanvasAutoStart();
     process.stdin.resume();
 
@@ -91,10 +91,8 @@ if (isMainModule(import.meta.url)) {
 }
 
 export {
-  createExcalidrawMcpServer,
-  createWhiteboardAiMcpServer,
-  excalidrawMcpServerFactory,
-  whiteboardAiMcpServerFactory,
+  createWhiteboardRtAgentMcpServer,
+  whiteboardRtAgentMcpServerFactory,
 } from './core/mcp-server.js';
 export { runServer };
 export default runServer;

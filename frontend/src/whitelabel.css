@@ -6,11 +6,11 @@
   display: none !important;
 }
 
-.whiteboardai-hidden {
+.whiteboardrt-agent-hidden {
   display: none !important;
 }
 
-.whiteboardai-about-backdrop {
+.whiteboardrt-agent-about-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -21,7 +21,7 @@
   background: rgba(0, 0, 0, 0.45);
 }
 
-.whiteboardai-about {
+.whiteboardrt-agent-about {
   width: min(520px, 100%);
   padding: 24px;
   border-radius: 12px;
@@ -32,21 +32,21 @@
     sans-serif;
 }
 
-.whiteboardai-about h2 {
+.whiteboardrt-agent-about h2 {
   margin: 0 0 12px;
   font-size: 20px;
 }
 
-.whiteboardai-about p {
+.whiteboardrt-agent-about p {
   margin: 0 0 12px;
   line-height: 1.5;
 }
 
-.whiteboardai-about a {
+.whiteboardrt-agent-about a {
   color: #1971c2;
 }
 
-.whiteboardai-about button {
+.whiteboardrt-agent-about button {
   margin-top: 8px;
   padding: 8px 16px;
   border: none;
@@ -56,11 +56,11 @@
   cursor: pointer;
 }
 
-.app[data-theme="dark"] .whiteboardai-about {
+.app[data-theme="dark"] .whiteboardrt-agent-about {
   background: #232329;
   color: #e3e3e8;
 }
 
-.app[data-theme="dark"] .whiteboardai-about a {
+.app[data-theme="dark"] .whiteboardrt-agent-about a {
   color: #74c0fc;
 }

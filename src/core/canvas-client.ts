@@ -309,12 +309,10 @@ export async function replaceElementsStrict(elements: ServerElement[]): Promise<
 }
 
 // Identity marker the canvas server puts in /health (v1.1+)
-export const CANVAS_SERVICE_NAME = 'whiteboardai-canvas';
-const LEGACY_CANVAS_SERVICE_NAMES = new Set(['mcp-excalidraw-canvas']);
+export const CANVAS_SERVICE_NAME = 'whiteboardrt-agent-canvas';
 
 export function isCanvasServiceName(name: string | undefined): boolean {
-  return name === CANVAS_SERVICE_NAME ||
-    (name !== undefined && LEGACY_CANVAS_SERVICE_NAMES.has(name));
+  return name === CANVAS_SERVICE_NAME;
 }
 
 export function foreignServiceError(): Error {

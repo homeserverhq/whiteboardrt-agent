@@ -194,14 +194,14 @@ await check('png: dark mode and transparent background change the output', async
 });
 
 await check('png: scale is clamped to the max dimension with a warning', async () => {
-  process.env.EXCALIDRAW_RENDER_MAX_DIM = '600';
+  process.env.WHITEBOARD_RT_AGENT_RENDER_MAX_DIM = '600';
   try {
     const result = await renderScene(scene, { format: 'png', scale: 4 });
     const dims = pngDimensions(Buffer.from(result.data, 'base64'));
     assert.ok(Math.max(dims.width, dims.height) <= 600, `max dim ${Math.max(dims.width, dims.height)}`);
     assert.ok(result.warnings.some(w => w.includes('scale reduced')));
   } finally {
-    delete process.env.EXCALIDRAW_RENDER_MAX_DIM;
+    delete process.env.WHITEBOARD_RT_AGENT_RENDER_MAX_DIM;
   }
 });
 

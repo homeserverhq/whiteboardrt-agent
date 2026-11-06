@@ -14,8 +14,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const serverPath = join(root, 'dist', 'server.js');
-const stateKey = 'rooms/whiteboardai-canvas-state-v1';
-const fileKey = 'files/whiteboardai-file-file1';
+const stateKey = 'rooms/whiteboardrt-agent-canvas-state-v1';
+const fileKey = 'files/whiteboardrt-agent-file-file1';
 
 const store = new Map();
 const storage = http.createServer((req, res) => {
@@ -64,7 +64,7 @@ function startCanvas(port) {
       PORT: String(port),
       HOST: '127.0.0.1',
       LOG_LEVEL: 'error',
-      WHITEBOARDAI_STORAGE_URL: storageUrl,
+      WHITEBOARD_RT_AGENT_STORAGE_URL: storageUrl,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -145,7 +145,7 @@ try {
   assert.equal(state.elements.length, 1);
   assert.equal(state.files.length, 1);
   assert.equal(state.files[0].id, 'file1');
-  assert.equal(state.files[0].blob, 'whiteboardai-file-file1');
+  assert.equal(state.files[0].blob, 'whiteboardrt-agent-file-file1');
 
   await stopCanvas(canvas.child);
   canvas = null;

@@ -1,6 +1,6 @@
 version: '3.8'
 
-# Docker Compose for WhiteboardAI Canvas
+# Docker Compose for WhiteboardRT Agent Canvas
 #
 # Usage scenarios:
 # 1. Canvas only:       docker-compose up canvas
@@ -10,22 +10,22 @@ version: '3.8'
 # Most common: Run canvas locally, MCP via Claude Desktop config
 
 services:
-  # WhiteboardAI canvas server - Visual UI and REST API
+  # WhiteboardRT Agent canvas server - Visual UI and REST API
   canvas:
     build:
       context: .
       dockerfile: Dockerfile.canvas
-    image: whiteboardai-canvas:latest
-    container_name: whiteboardai-canvas
+    image: whiteboardrt-agent-canvas:latest
+    container_name: whiteboardrt-agent-canvas
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
-      - WHITEBOARDAI_PUBLIC_URL=${WHITEBOARDAI_PUBLIC_URL:-}
-      - WHITEBOARDAI_STORAGE_URL=${WHITEBOARDAI_STORAGE_URL:-}
-      - WHITEBOARDAI_PERSISTENCE=${WHITEBOARDAI_PERSISTENCE:-}
+      - WHITEBOARD_RT_AGENT_PUBLIC_URL=${WHITEBOARD_RT_AGENT_PUBLIC_URL:-}
+      - WHITEBOARD_RT_AGENT_STORAGE_URL=${WHITEBOARD_RT_AGENT_STORAGE_URL:-}
+      - WHITEBOARD_RT_AGENT_PERSISTENCE=${WHITEBOARD_RT_AGENT_PERSISTENCE:-}
       - DEBUG=false
     restart: unless-stopped
     healthcheck:
@@ -43,14 +43,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: whiteboardai-mcp:latest
-    container_name: whiteboardai-mcp
+    image: whiteboardrt-agent-mcp:latest
+    container_name: whiteboardrt-agent-mcp
     ports:
       - "3100:3100"
     environment:
       - NODE_ENV=production
       - EXPRESS_SERVER_URL=http://canvas:3000
-      - WHITEBOARDAI_PUBLIC_URL=${WHITEBOARDAI_PUBLIC_URL:-}
+      - WHITEBOARD_RT_AGENT_PUBLIC_URL=${WHITEBOARD_RT_AGENT_PUBLIC_URL:-}
       - ENABLE_CANVAS_SYNC=true
       - MCP_TRANSPORT=http
       - MCP_HOST=0.0.0.0

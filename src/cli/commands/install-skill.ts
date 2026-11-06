@@ -5,8 +5,7 @@ import { fileURLToPath } from 'url';
 import { parseArgs, CliUsageError } from '../args.js';
 import { printJson, note } from '../util.js';
 
-const SKILL_NAME = 'whiteboardai-skill';
-const LEGACY_SKILL_NAME = 'excalidraw-skill';
+const SKILL_NAME = 'whiteboardrt-agent-skill';
 
 // The published package layout is <root>/{dist,skills,...}; this module
 // compiles to dist/cli/commands/, so the package root is three levels up.
@@ -88,13 +87,6 @@ export async function installSkill(argv: string[]): Promise<void> {
     throw new Error(
       `${target} is a symlink; refusing to replace it. Remove it manually if you want the CLI to manage this install.`
     );
-  }
-
-  // Remove the legacy branded skill from this root so agents do not keep both.
-  const legacyTarget = path.join(root, LEGACY_SKILL_NAME);
-  if (legacyTarget !== target && fs.existsSync(legacyTarget)) {
-    fs.rmSync(legacyTarget, { recursive: true, force: true });
-    note(`Removed legacy skill install at ${legacyTarget}`);
   }
 
   // Stage into a sibling temp dir, then swap

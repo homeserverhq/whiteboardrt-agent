@@ -3,7 +3,7 @@ import { webcrypto } from 'crypto';
 import { ServerElement } from '../types.js';
 import { PRODUCT_NAME } from './brand.js';
 import { expandElementsForExport } from './expand-elements.js';
-import { EXCALIDRAW_SHARE_UPLOAD_URL, EXCALIDRAW_SHARE_BASE_URL } from './config.js';
+import { AGENT_SHARE_UPLOAD_URL, AGENT_SHARE_BASE_URL } from './config.js';
 
 // Excalidraw's concatBuffers: [4-byte version=1][4-byte len][chunk]...
 function concatBuffers(...bufs: Uint8Array[]): Uint8Array {
@@ -23,14 +23,14 @@ function concatBuffers(...bufs: Uint8Array[]): Uint8Array {
 }
 
 // Export elements to a shareable URL. Sharing is disabled unless
-// WHITEBOARDAI_SHARE_UPLOAD_URL and WHITEBOARDAI_SHARE_BASE_URL are configured.
+// AGENT_SHARE_UPLOAD_URL and AGENT_SHARE_BASE_URL are configured.
 // The diagram is encrypted client-side (AES-GCM 128) and uploaded; the
 // decryption key only lives in the URL fragment.
 export async function exportToExcalidrawUrl(urlExportElements: ServerElement[]): Promise<string> {
-  if (!EXCALIDRAW_SHARE_UPLOAD_URL || !EXCALIDRAW_SHARE_BASE_URL) {
+  if (!AGENT_SHARE_UPLOAD_URL || !AGENT_SHARE_BASE_URL) {
     throw new Error(
-      'Sharing is not configured. Set WHITEBOARDAI_SHARE_UPLOAD_URL and ' +
-      'WHITEBOARDAI_SHARE_BASE_URL to enable it.'
+      'Sharing is not configured. Set AGENT_SHARE_UPLOAD_URL and ' +
+      'AGENT_SHARE_BASE_URL to enable it.'
     );
   }
 
@@ -88,13 +88,13 @@ export async function exportToExcalidrawUrl(urlExportElements: ServerElement[]):
   const payload = concatBuffers(encodingMeta, iv, ciphertext);
 
   // POST to the excalidraw-json store
-  const uploadResponse = await fetch(EXCALIDRAW_SHARE_UPLOAD_URL, {
+  const uploadResponse = await fetch(AGENT_SHARE_UPLOAD_URL, {
     method: 'POST',
     body: Buffer.from(payload)
   });
 
   if (!uploadResponse.ok) {
-    throw new Error(`Upload to ${new URL(EXCALIDRAW_SHARE_UPLOAD_URL).host} failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+    throw new Error(`Upload to ${new URL(AGENT_SHARE_UPLOAD_URL).host} failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
   }
 
   const uploadResult = await uploadResponse.json() as { id: string };
@@ -103,5 +103,5 @@ export async function exportToExcalidrawUrl(urlExportElements: ServerElement[]):
   const jwk = await webcrypto.subtle.exportKey('jwk', cryptoKey);
 
   // Build shareable URL
-  return `${EXCALIDRAW_SHARE_BASE_URL}/#json=${uploadResult.id},${jwk.k}`;
+  return `${AGENT_SHARE_BASE_URL}/#json=${uploadResult.id},${jwk.k}`;
 }

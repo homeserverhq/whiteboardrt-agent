@@ -1,14 +1,12 @@
 {
-  "name": "whiteboardai-server",
+  "name": "whiteboardrt-agent-server",
   "version": "2.1.2",
-  "description": "WhiteboardAI canvas toolkit for AI agents — agent skill, CLI, and MCP server with a live shared canvas",
+  "description": "WhiteboardRT Agent canvas toolkit for AI agents — agent skill, CLI, and MCP server with a live shared canvas",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "whiteboardai-server": "dist/bin.js",
-    "whiteboardai-canvas": "dist/bin.js",
-    "mcp-excalidraw-server": "dist/bin.js",
-    "excalidraw-canvas": "dist/bin.js"
+    "whiteboardrt-agent-server": "dist/bin.js",
+    "whiteboardrt-agent-canvas": "dist/bin.js"
   },
   "scripts": {
     "start": "npm run build:server && node dist/index.js",
@@ -93,9 +91,9 @@
     "agent-skills",
     "cli",
     "ai-agents",
-    "whiteboardai"
+    "whiteboardrt-agent"
   ],
-  "author": "WhiteboardAI contributors",
+  "author": "WhiteboardRT Agent contributors",
   "license": "MIT",
   "repository": {
     "type": "git",

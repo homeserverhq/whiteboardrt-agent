@@ -9,7 +9,7 @@ export function sanitizeFilePath(filePath: string): string {
   if (!resolved.startsWith(allowedDir + path.sep) && resolved !== allowedDir) {
     throw new Error(
       `Path traversal blocked: "${filePath}" resolves outside the allowed directory "${allowedDir}". ` +
-      `Set EXCALIDRAW_EXPORT_DIR to change the allowed base directory.`
+      `Set WHITEBOARD_RT_AGENT_EXPORT_DIR to change the allowed base directory.`
     );
   }
   return resolved;

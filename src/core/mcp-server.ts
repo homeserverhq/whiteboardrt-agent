@@ -5,9 +5,9 @@ import { packageVersion } from './version.js';
 import { enabledTools } from './disabled-tools.js';
 import { callExcalidrawTool } from './mcp-dispatch.js';
 
-const SERVER_NAME = 'whiteboardai-server';
+const SERVER_NAME = 'whiteboardrt-agent-server';
 const SERVER_DESCRIPTION =
-  'Programmatic canvas toolkit for WhiteboardAI with file I/O, image export, and real-time sync';
+  'Programmatic canvas toolkit for WhiteboardRT Agent with file I/O, image export, and real-time sync';
 const SERVER_VERSION = packageVersion();
 
 // `tools/list` and `server/discover` are cacheable results on 2026-07-28
@@ -19,7 +19,7 @@ const SERVER_VERSION = packageVersion();
 const STATIC_SURFACE_CACHE_HINT = { ttlMs: 300_000, cacheScope: 'public' as const };
 
 /**
- * Builds a fresh MCP server instance exposing the WhiteboardAI toolkit.
+ * Builds a fresh MCP server instance exposing the WhiteboardRT Agent toolkit.
  *
  * One instance serves exactly one serving unit (one stdio connection, or one
  * discarded `server/discover` probe), which is why nothing canvas-related is
@@ -28,7 +28,7 @@ const STATIC_SURFACE_CACHE_HINT = { ttlMs: 300_000, cacheScope: 'public' as cons
  * whether the client opened with `initialize` (2025) or with the per-request
  * `_meta` envelope (2026-07-28).
  */
-export function createWhiteboardAiMcpServer(ctx?: McpRequestContext): McpServer {
+export function createWhiteboardRtAgentMcpServer(ctx?: McpRequestContext): McpServer {
   const server = new McpServer(
     {
       name: SERVER_NAME,
@@ -58,7 +58,7 @@ export function createWhiteboardAiMcpServer(ctx?: McpRequestContext): McpServer 
     );
   }
 
-  logger.debug('Built WhiteboardAI MCP server instance', {
+  logger.debug('Built WhiteboardRT Agent MCP server instance', {
     era: ctx?.era ?? 'unknown',
     toolCount: enabledTools.length
   });
@@ -70,8 +70,4 @@ export function createWhiteboardAiMcpServer(ctx?: McpRequestContext): McpServer 
  * The factory handed to the SDK's serving entries (`serveStdio`). It is called
  * once per connection with the era the connection negotiated.
  */
-export const whiteboardAiMcpServerFactory: McpServerFactory = ctx => createWhiteboardAiMcpServer(ctx);
-
-// Backward-compatible aliases for integrations using the upstream names.
-export const createExcalidrawMcpServer = createWhiteboardAiMcpServer;
-export const excalidrawMcpServerFactory = whiteboardAiMcpServerFactory;
+export const whiteboardRtAgentMcpServerFactory: McpServerFactory = ctx => createWhiteboardRtAgentMcpServer(ctx);

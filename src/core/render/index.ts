@@ -61,9 +61,7 @@ export const DEFAULT_PADDING = 10;
 export const DEFAULT_MAX_DIMENSION = 8192;
 
 export function maxDimension(): number {
-  const raw = Number(
-    process.env.WHITEBOARDAI_RENDER_MAX_DIM ?? process.env.EXCALIDRAW_RENDER_MAX_DIM
-  );
+  const raw = Number(process.env.WHITEBOARD_RT_AGENT_RENDER_MAX_DIM);
   return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_MAX_DIMENSION;
 }
 

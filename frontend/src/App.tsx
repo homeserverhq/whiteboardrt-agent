@@ -24,7 +24,7 @@ import { PRODUCT_NAME } from './brand'
 import type { ServerElement } from './utils/scene'
 import type { MermaidConfig } from '@excalidraw/mermaid-to-excalidraw'
 
-const LIBRARY_STORAGE_KEY = 'excalidraw-canvas-library'
+const LIBRARY_STORAGE_KEY = 'whiteboardrt-agent-library'
 
 /**
  * Persists the user's library in this browser.
@@ -132,7 +132,7 @@ function App(): JSX.Element {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window === 'undefined') return 'dark'
     try {
-      const saved = window.localStorage?.getItem('excalidraw-canvas-theme')
+      const saved = window.localStorage?.getItem('whiteboardrt-agent-theme')
       if (saved === 'light' || saved === 'dark') return saved
     } catch (error) {
       console.warn('Failed to read theme from localStorage:', error)
@@ -948,7 +948,7 @@ function App(): JSX.Element {
               if (appState?.theme && appState.theme !== theme) {
                 setTheme(appState.theme)
                 try {
-                  window.localStorage?.setItem('excalidraw-canvas-theme', appState.theme)
+                  window.localStorage?.setItem('whiteboardrt-agent-theme', appState.theme)
                 } catch (error) {
                   console.warn('Failed to save theme to localStorage:', error)
                 }

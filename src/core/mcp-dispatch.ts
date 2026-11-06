@@ -7,7 +7,7 @@ import {
   ServerElement,
   ExcalidrawElementType
 } from '../types.js';
-import { EXCALIDRAW_PUBLIC_URL } from './config.js';
+import { AGENT_PUBLIC_URL } from './config.js';
 import { isToolDisabled } from './disabled-tools.js';
 import {
   updateElementOnCanvas,
@@ -422,7 +422,7 @@ export async function callExcalidrawTool(
           return {
             content: [{
               type: 'text',
-              text: `Mermaid diagram sent for conversion!\n\n${JSON.stringify(result, null, 2)}\n\n⚠️  Note: The actual conversion happens in the frontend canvas with DOM access. Open the canvas at ${EXCALIDRAW_PUBLIC_URL} to see the diagram rendered.`
+              text: `Mermaid diagram sent for conversion!\n\n${JSON.stringify(result, null, 2)}\n\n⚠️  Note: The actual conversion happens in the frontend canvas with DOM access. Open the canvas at ${AGENT_PUBLIC_URL} to see the diagram rendered.`
             }]
           };
         } catch (error) {
@@ -675,8 +675,7 @@ export async function callExcalidrawTool(
         };
       }
 
-      case 'export_to_share_url':
-      case 'export_to_excalidraw_url': {
+      case 'export_to_share_url': {
         logger.info('Exporting to shareable URL');
 
         const urlExportElements = await getElements();
