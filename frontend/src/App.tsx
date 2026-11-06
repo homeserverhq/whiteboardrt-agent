@@ -924,7 +924,15 @@ function App(): JSX.Element {
     <div className="app" data-theme={theme}>
       {/* Header */}
       <div className="header">
-        <h1>{PRODUCT_NAME}</h1>
+        <div className="header-brand">
+          <img
+            src="/whiteboardrt-agent-logo.png"
+            alt=""
+            className="header-brand-logo"
+            draggable={false}
+          />
+          <h1>{PRODUCT_NAME}</h1>
+        </div>
         <div className="controls">
           <div className="status">
             <div className={`status-dot ${isConnected ? 'status-connected' : 'status-disconnected'}`}></div>

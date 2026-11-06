@@ -10,6 +10,18 @@
   display: none !important;
 }
 
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-brand-logo {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
 .whiteboardrt-agent-about-backdrop {
   position: fixed;
   inset: 0;
@@ -30,6 +42,13 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
     sans-serif;
+}
+
+.whiteboardrt-agent-about-logo {
+  display: block;
+  height: 96px;
+  width: auto;
+  margin: 0 auto 12px;
 }
 
 .whiteboardrt-agent-about h2 {

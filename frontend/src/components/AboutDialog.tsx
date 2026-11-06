@@ -22,6 +22,12 @@ export const AboutDialog = ({
         aria-labelledby="whiteboardrt-agent-about-title"
         onClick={(event) => event.stopPropagation()}
       >
+        <img
+          src="/whiteboardrt-agent-logo.png"
+          alt=""
+          className="whiteboardrt-agent-about-logo"
+          draggable={false}
+        />
         <h2 id="whiteboardrt-agent-about-title">About {PRODUCT_NAME}</h2>
         <p>
           {PRODUCT_NAME} is a live canvas for AI agents to draw, inspect, and
