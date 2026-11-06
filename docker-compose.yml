@@ -1,6 +1,6 @@
 version: '3.8'
 
-# Docker Compose for WhiteboardRT Agent Canvas
+# Docker Compose for WhiteboardRT Agent
 #
 # Usage scenarios:
 # 1. Canvas only:       docker-compose up canvas
@@ -10,7 +10,7 @@ version: '3.8'
 # Most common: Run canvas locally, MCP via Claude Desktop config
 
 services:
-  # WhiteboardRT Agent canvas server - Visual UI and REST API
+  # WhiteboardRT Agent server - Visual UI and REST API
   canvas:
     build:
       context: .

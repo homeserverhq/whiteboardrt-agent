@@ -1,7 +1,7 @@
 {
   "name": "whiteboardrt-agent-server",
   "version": "2.1.2",
-  "description": "WhiteboardRT Agent canvas toolkit for AI agents — agent skill, CLI, and MCP server with a live shared canvas",
+  "description": "WhiteboardRT Agent toolkit for AI agents — agent skill, CLI, and MCP server with a live shared canvas",
   "main": "dist/index.js",
   "type": "module",
   "bin": {

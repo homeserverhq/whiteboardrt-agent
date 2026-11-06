@@ -1600,7 +1600,7 @@ async function startServer(): Promise<void> {
 
   server.listen(PORT, HOST, () => {
     const hostForUrl = formatHostForUrl(HOST);
-    logger.info(`WhiteboardRT Agent canvas server running on http://${hostForUrl}:${PORT}`);
+    logger.info(`WhiteboardRT Agent server running on http://${hostForUrl}:${PORT}`);
     logger.info(`WebSocket server running on ws://${hostForUrl}:${PORT}`);
 
     // Written only after listen succeeds so stale files can't shadow a

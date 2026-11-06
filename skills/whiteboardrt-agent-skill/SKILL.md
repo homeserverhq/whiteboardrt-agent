@@ -1,6 +1,6 @@
 ---
 name: whiteboardrt-agent-skill
-description: WhiteboardRT Agent canvas toolkit for creating, editing, and refining diagrams on a live canvas. Use when an agent needs to (1) draw or lay out diagrams, (2) iteratively refine them by describing the scene and screenshotting its own work, (3) export/import .excalidraw files or PNG/SVG images, (4) save/restore canvas snapshots, (5) convert Mermaid to WhiteboardRT Agent, or (6) perform element-level CRUD, alignment, distribution, grouping, duplication, and locking. Primary interface is the bundled CLI (npx -y whiteboardrt-agent-server <command>) which auto-starts the canvas server; MCP tools and a REST API are equivalent alternatives.
+description: WhiteboardRT Agent toolkit for creating, editing, and refining diagrams on a live canvas. Use when an agent needs to (1) draw or lay out diagrams, (2) iteratively refine them by describing the scene and screenshotting its own work, (3) export/import .excalidraw files or PNG/SVG images, (4) save/restore canvas snapshots, (5) convert Mermaid to WhiteboardRT Agent, or (6) perform element-level CRUD, alignment, distribution, grouping, duplication, and locking. Primary interface is the bundled CLI (npx -y whiteboardrt-agent-server <command>) which auto-starts the canvas server; MCP tools and a REST API are equivalent alternatives.
 ---
 
 # WhiteboardRT Agent Skill

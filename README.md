@@ -1,8 +1,8 @@
-# WhiteboardRT Agent Canvas
+# WhiteboardRT Agent
 
-WhiteboardRT Agent Canvas is a modified fork of [mcp_excalidraw](https://github.com/yctimlin/mcp_excalidraw), packaged as a self-hosted live canvas for AI agents. Agents can draw, inspect, refine, export, and restore diagrams through the REST API, WebSocket sync, or headless renderer.
+WhiteboardRT Agent is a modified fork of [mcp_excalidraw](https://github.com/yctimlin/mcp_excalidraw), packaged as a self-hosted live canvas for AI agents. Agents can draw, inspect, refine, export, and restore diagrams through the REST API, WebSocket sync, or headless renderer.
 
-This repository preserves the upstream git history for provenance. WhiteboardRT Agent Canvas is **not affiliated with or endorsed by Excalidraw**.
+This repository preserves the upstream git history for provenance. WhiteboardRT Agent is **not affiliated with or endorsed by Excalidraw**.
 
 ## Changes from upstream
 
@@ -99,6 +99,6 @@ npm run test:canvas
 
 ## License and attribution
 
-WhiteboardRT Agent Canvas includes code from mcp_excalidraw and Excalidraw. See [LICENSE](./LICENSE) and [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
+WhiteboardRT Agent includes code from mcp_excalidraw and Excalidraw. See [LICENSE](./LICENSE) and [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
 
 The Excalidraw name and logo are trademarks of their respective owner. This fork does not claim any affiliation with or endorsement by Excalidraw.

@@ -1,9 +1,9 @@
 # WhiteboardRT Agent MCP Server, CLI & Agent Skill
 
 > This document covers the WhiteboardRT Agent MCP server, CLI, and agent skill. The
-> WhiteboardRT Agent canvas container is documented in [README.md](./README.md).
+> WhiteboardRT Agent container is documented in [README.md](./README.md).
 
-**whiteboardrt-agent-server** gives AI agents a live WhiteboardRT Agent canvas they can draw on, look at, refine, and save into your repo. Your agent creates architecture diagrams and flowcharts programmatically, **sees its own work via screenshots**, fixes layout problems, and exports `.excalidraw` files you can commit next to your code.
+**whiteboardrt-agent-server** gives AI agents a live WhiteboardRT Agent workspace they can draw on, look at, refine, and save into your repo. Your agent creates architecture diagrams and flowcharts programmatically, **sees its own work via screenshots**, fixes layout problems, and exports `.excalidraw` files you can commit next to your code.
 
 One canvas, three ways to drive it:
 
@@ -127,7 +127,7 @@ The only prerequisite is **Node.js ≥ 20**.
 Copy this into your coding agent — it installs the portable skill into the project/global skill directory that agent already knows how to use, then verifies it by drawing a test diagram:
 
 ```text
-Install the WhiteboardRT Agent canvas toolkit so you can draw diagrams for me:
+Install the WhiteboardRT Agent toolkit so you can draw diagrams for me:
 
 1. Choose the right skill directory for this agent and scope (project or global).
 2. Run: npx -y whiteboardrt-agent-server install-skill --dir <that-skills-directory>
@@ -234,7 +234,7 @@ Labels and arrow bindings use the agent-friendly format everywhere in the CLI: `
 
 ## Headless Rendering
 
-Since v2.1, `screenshot`, `export_to_image` and `get_canvas_screenshot` render without a browser. Inside the canvas server, the scene is prepared with the canvas tab's own code (label sizing, wrapping and centering, defaults) and the canvas `exportToSvg` draws it under Node (a small jsdom shim supplies the DOM it expects, and text is measured with the bundled fonts' real glyph widths); [resvg](https://github.com/thx/resvg-js) rasterizes the SVG to PNG. The output is what the WhiteboardRT Agent canvas draws — same SVG structure as a browser export, text within half a pixel — and it is deterministic: an unchanged scene renders to byte-identical SVG and PNG, so committed images stay diff-clean.
+Since v2.1, `screenshot`, `export_to_image` and `get_canvas_screenshot` render without a browser. Inside the canvas server, the scene is prepared with the canvas tab's own code (label sizing, wrapping and centering, defaults) and the canvas `exportToSvg` draws it under Node (a small jsdom shim supplies the DOM it expects, and text is measured with the bundled fonts' real glyph widths); [resvg](https://github.com/thx/resvg-js) rasterizes the SVG to PNG. The output is what the WhiteboardRT Agent draws — same SVG structure as a browser export, text within half a pixel — and it is deterministic: an unchanged scene renders to byte-identical SVG and PNG, so committed images stay diff-clean.
 
 - **Fonts**: Excalifont, Virgil, Cascadia Code and Liberation Sans ship as TTFs in `assets/fonts` (all SIL OFL 1.1; see `assets/fonts/LICENSES.md`). SVGs embed the faces they use, so they look right in browsers, GitHub and editors. Nunito, Lilita One and Comic Shanns render with the closest bundled face for now. Text in other scripts (CJK, emoji) falls back to the machine's fonts, with a warning.
 - **Options** (CLI flags / REST body / MCP params): `background`, `dark`, `scale` 1–4 (PNG), `padding`, `elementIds` or `frameId` to render a subset, `embedFonts`, `embedScene` (PNG only, default false). `WHITEBOARD_RT_AGENT_RENDER_MAX_DIM` (default 8192) caps the PNG's largest side.
