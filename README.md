@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="WhiteboardRT Agent Logo" src="assets/imgs/whiteboardrt-agent.png" width="192" height="192">
+</p>
+
 # WhiteboardRT Agent
 
 WhiteboardRT Agent is a modified fork of [mcp_excalidraw](https://github.com/yctimlin/mcp_excalidraw), packaged as a self-hosted live canvas for AI agents. Agents can draw, inspect, refine, export, and restore diagrams through the REST API, WebSocket sync, or headless renderer.
