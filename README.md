@@ -75,7 +75,7 @@ The AI canvas is designed as a single shared instance. It can persist its checkp
 
 ```bash
 WHITEBOARD_RT_AGENT_PERSISTENCE=remote
-WHITEBOARD_RT_AGENT_STORAGE_URL=http://excalidraw-storage:8080/api/v2
+WHITEBOARD_RT_AGENT_STORAGE_URL=http://whiteboardrt-storage-backend:8080/api/v2
 ```
 
 The storage backend stores the canvas checkpoint under `whiteboardrt-agent-canvas-state-v1` and image blobs under `whiteboardrt-agent-file-*`. This mode supports one AI canvas writer; do not run multiple AI canvas replicas against the same state key.

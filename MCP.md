@@ -299,7 +299,7 @@ In HTTP mode, `info`/`debug` logs are written to stderr (visible in `docker logs
 
 #### Durable canvas state
 
-For the shared single-instance canvas, remote persistence can use the same storage backend as the WhiteboardRT web container instead of a local data directory. Set `WHITEBOARD_RT_AGENT_STORAGE_URL` (for example `http://excalidraw-storage:8080/api/v2`) and, optionally, `WHITEBOARD_RT_AGENT_PERSISTENCE=remote`. Remote mode stores the canvas checkpoint in the storage backend and image blobs alongside it; `WHITEBOARD_RT_AGENT_DATA_DIR` remains available for standalone/local deployments.
+For the shared single-instance canvas, remote persistence can use the same storage backend as the WhiteboardRT web container instead of a local data directory. Set `WHITEBOARD_RT_AGENT_STORAGE_URL` (for example `http://whiteboardrt-storage-backend:8080/api/v2`) and, optionally, `WHITEBOARD_RT_AGENT_PERSISTENCE=remote`. Remote mode stores the canvas checkpoint in the storage backend and image blobs alongside it; `WHITEBOARD_RT_AGENT_DATA_DIR` remains available for standalone/local deployments.
 
 Set `WHITEBOARD_RT_AGENT_DATA_DIR` to recover elements, server-known image files, and named snapshots after a canvas-server restart. From a source checkout after `npm run build`:
 
@@ -673,7 +673,7 @@ Sharing is disabled by default. When configured, `share` encrypts the scene loca
 
 ### Can share links point at a self-hosted service?
 
-Yes. Set `WHITEBOARD_RT_AGENT_SHARE_UPLOAD_URL` to your storage backend's scene endpoint and `WHITEBOARD_RT_AGENT_SHARE_BASE_URL` to the viewer base URL. Any backend that speaks the excalidraw-json API works, for example [alswl/excalidraw-storage-backend](https://github.com/alswl/excalidraw-storage-backend), whose endpoint is `<storage>/api/v2/scenes/`:
+Yes. Set `WHITEBOARD_RT_AGENT_SHARE_UPLOAD_URL` to your storage backend's scene endpoint and `WHITEBOARD_RT_AGENT_SHARE_BASE_URL` to the viewer base URL. Any backend that speaks the excalidraw-json API works, for example [WhiteboardRT Storage Backend](https://github.com/homeserverhq/whiteboardrt-storage-backend), whose endpoint is `<storage>/api/v2/scenes/`:
 
 ```bash
 WHITEBOARD_RT_AGENT_SHARE_UPLOAD_URL=https://draw.example.com/api/v2/scenes/ \
@@ -681,7 +681,7 @@ WHITEBOARD_RT_AGENT_SHARE_BASE_URL=https://draw.example.com \
   npx -y whiteboardrt-agent-server share
 ```
 
-Your app must load `#json=` links from that same backend (for the alswl fork: `VITE_APP_BACKEND_V2_GET_URL`).
+Your app must load `#json=` links from that same backend (`VITE_APP_BACKEND_V2_GET_URL` in WhiteboardRT).
 
 ### Does it need an API key or cloud service?
 

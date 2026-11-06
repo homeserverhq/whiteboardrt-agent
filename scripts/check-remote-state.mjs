@@ -2,7 +2,7 @@
 // Shared-storage persistence checks. Run after `npm run build:server`:
 //   node scripts/check-remote-state.mjs
 //
-// Starts a fake excalidraw-storage-backend, runs the canvas server against it,
+// Starts a fake WhiteboardRT Storage Backend, runs the canvas server against it,
 // commits elements/files, restarts, and verifies recovery.
 
 import assert from 'node:assert/strict';
