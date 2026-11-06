@@ -59,6 +59,59 @@ test.beforeEach(async ({ request }) => {
   await seed(request, []);
 });
 
+test('Open loads directly on an empty canvas and asks for a backup on a non-empty one', async ({ page, request }) => {
+  await page.goto('/');
+  await expect(syncButton(page)).toBeEnabled();
+
+  // Empty canvas: Open goes straight to the file picker.
+  const [emptyChooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    (async () => {
+      await page.getByTestId('main-menu-trigger').click();
+      await page.getByTestId('open-button').click();
+    })(),
+  ]);
+  await expect(page.getByRole('dialog', { name: 'Load from file' })).toHaveCount(0);
+
+  await emptyChooser.setFiles({
+    name: 'loaded.excalidraw',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify({
+      type: 'excalidraw',
+      version: 2,
+      source: 'WhiteboardRT Agent',
+      elements: frameScene(),
+      appState: {},
+      files: {},
+    })),
+  });
+
+  await expect(page.getByText('repro-frame', { exact: true })).toBeVisible();
+  const loaded = await sync(page, request);
+  expect(loaded).toHaveLength(3);
+
+  // Non-empty canvas: Open shows the backup dialog first.
+  await page.getByTestId('main-menu-trigger').click();
+  await page.getByTestId('open-button').click();
+
+  const dialog = page.getByRole('dialog', { name: 'Load from file' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText('Loading from a file will', { exact: false })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Export as image' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Save to disk' })).toBeVisible();
+
+  const saveDownload = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'Save to disk' }).click();
+  expect((await saveDownload).suggestedFilename()).toBe('whiteboardrt-agent-backup.excalidraw');
+
+  const imageDownload = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'Export as image' }).click();
+  expect((await imageDownload).suggestedFilename()).toBe('whiteboardrt-agent-backup.png');
+
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog).toHaveCount(0);
+});
+
 test('native frame survives real WebSocket load, repeated reload and sync', async ({ page, request }) => {
   await seed(request, frameScene());
   await page.goto('/');

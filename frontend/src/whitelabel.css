@@ -64,3 +64,146 @@
 .app[data-theme="dark"] .whiteboardrt-agent-about a {
   color: #74c0fc;
 }
+
+.whiteboardrt-agent-load-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.whiteboardrt-agent-load-dialog {
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 24px;
+  border-radius: 12px;
+  background: #fff;
+  color: #1e1e1e;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
+}
+
+.whiteboardrt-agent-load-dialog h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.whiteboardrt-agent-load-dialog-description {
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  border-left: 4px solid #e67700;
+  border-radius: 4px;
+  background: #fff4e6;
+  line-height: 1.5;
+}
+
+.whiteboardrt-agent-load-dialog-primary {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  background: #e67700;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.whiteboardrt-agent-load-dialog-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.whiteboardrt-agent-load-dialog-action {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid #d0d0d7;
+  border-radius: 8px;
+}
+
+.whiteboardrt-agent-load-dialog-action h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.whiteboardrt-agent-load-dialog-action p {
+  flex: 1;
+  margin: 0 0 12px;
+  color: #555;
+  line-height: 1.45;
+}
+
+.whiteboardrt-agent-load-dialog-action button,
+.whiteboardrt-agent-load-dialog-cancel {
+  padding: 8px 14px;
+  border: 1px solid #adb5bd;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.whiteboardrt-agent-load-dialog-action button:hover,
+.whiteboardrt-agent-load-dialog-cancel:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.whiteboardrt-agent-load-dialog-primary:disabled,
+.whiteboardrt-agent-load-dialog-action button:disabled,
+.whiteboardrt-agent-load-dialog-cancel:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.whiteboardrt-agent-load-dialog-status,
+.whiteboardrt-agent-load-dialog-error {
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.whiteboardrt-agent-load-dialog-status {
+  color: #2b8a3e;
+}
+
+.whiteboardrt-agent-load-dialog-error {
+  color: #c92a2a;
+}
+
+.whiteboardrt-agent-load-dialog-cancel {
+  margin-top: 4px;
+}
+
+.app[data-theme="dark"] .whiteboardrt-agent-load-dialog {
+  background: #232329;
+  color: #e3e3e8;
+}
+
+.app[data-theme="dark"] .whiteboardrt-agent-load-dialog-description {
+  background: #3a2d1a;
+  border-left-color: #f59f00;
+}
+
+.app[data-theme="dark"] .whiteboardrt-agent-load-dialog-action {
+  border-color: #4a4a55;
+}
+
+.app[data-theme="dark"] .whiteboardrt-agent-load-dialog-action p {
+  color: #b8b8c2;
+}
+
+.app[data-theme="dark"] .whiteboardrt-agent-load-dialog-action button,
+.app[data-theme="dark"] .whiteboardrt-agent-load-dialog-cancel {
+  border-color: #6b6b78;
+}
+
+.app[data-theme="dark"] .whiteboardrt-agent-load-dialog-action button:hover,
+.app[data-theme="dark"] .whiteboardrt-agent-load-dialog-cancel:hover {
+  background: rgba(255, 255, 255, 0.08);
+}

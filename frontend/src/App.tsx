@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Excalidraw,
   MainMenu,
@@ -20,6 +20,8 @@ import { cleanElementForExcalidraw, prepareServerScene, assertScenePreserved } f
 import { preloadCanvasFonts } from './utils/fonts'
 import { installBrandingCleanup } from './utils/branding'
 import { AboutDialog } from './components/AboutDialog'
+import { LoadSceneDialog } from './components/LoadSceneDialog'
+import type { LoadSceneDialogHandle } from './components/LoadSceneDialog'
 import { PRODUCT_NAME } from './brand'
 import type { ServerElement } from './utils/scene'
 import type { MermaidConfig } from '@excalidraw/mermaid-to-excalidraw'
@@ -112,6 +114,9 @@ const SCENE_MUTATIONS = new Set([
 function App(): JSX.Element {
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPIRefValue | null>(null)
   const [showAbout, setShowAbout] = useState(false)
+  const [showLoadDialog, setShowLoadDialog] = useState(false)
+  const loadDialogRef = useRef<LoadSceneDialogHandle>(null)
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)
   useEffect(() => installBrandingCleanup(), [])
   // Ref so WS message handlers (captured in stale closures) always see the latest API instance
   const excalidrawAPIRef = useRef<ExcalidrawAPIRefValue | null>(null)
@@ -861,6 +866,44 @@ function App(): JSX.Element {
     }, AUTO_SYNC_DEBOUNCE_MS)
   }
 
+  const handleOpenRequest = useCallback((): void => {
+    if (!excalidrawAPI || sceneLoadStatusRef.current !== 'ready') {
+      return
+    }
+
+    if (excalidrawAPI.getSceneElements().length === 0) {
+      loadDialogRef.current?.openFilePicker()
+      return
+    }
+
+    setShowLoadDialog(true)
+  }, [excalidrawAPI])
+
+  const handleSceneLoaded = (): void => {
+    userInteractedRef.current = true
+    scheduleAutoSync()
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'o') {
+        return
+      }
+
+      const target = event.target as HTMLElement | null
+      if (target?.closest('input, textarea, [contenteditable="true"]')) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      handleOpenRequest()
+    }
+
+    document.addEventListener('keydown', handleKeyDown, true)
+    return () => document.removeEventListener('keydown', handleKeyDown, true)
+  }, [handleOpenRequest])
+
   const clearCanvas = async (): Promise<void> => {
     if (!canSyncScene()) return
     const generation = pauseSceneSync()
@@ -943,6 +986,7 @@ function App(): JSX.Element {
         >
           <Excalidraw
             viewModeEnabled={sceneLoadStatus !== 'ready'}
+            UIOptions={{ canvasActions: { loadScene: false } }}
             excalidrawAPI={(api: ExcalidrawAPIRefValue) => setExcalidrawAPI(api)}
             onChange={(_elements, appState) => {
               if (appState?.theme && appState.theme !== theme) {
@@ -964,6 +1008,14 @@ function App(): JSX.Element {
             }}
           >
             <MainMenu>
+              <MainMenu.Item
+                data-testid="open-button"
+                shortcut={isMac ? '⌘O' : 'Ctrl+O'}
+                onSelect={handleOpenRequest}
+                disabled={!excalidrawAPI || sceneLoadStatus !== 'ready'}
+              >
+                Open
+              </MainMenu.Item>
               <MainMenu.DefaultItems.Export />
               <MainMenu.DefaultItems.SearchMenu />
               <MainMenu.Separator />
@@ -978,6 +1030,13 @@ function App(): JSX.Element {
         </div>
       </div>
       <AboutDialog open={showAbout} onClose={() => setShowAbout(false)} />
+      <LoadSceneDialog
+        ref={loadDialogRef}
+        open={showLoadDialog}
+        onClose={() => setShowLoadDialog(false)}
+        excalidrawAPI={excalidrawAPI}
+        onSceneLoaded={handleSceneLoaded}
+      />
     </div>
   )
 }
